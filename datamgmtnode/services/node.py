@@ -3,6 +3,7 @@ import asyncio
 import time
 import hashlib
 from cryptography.fernet import Fernet
+from blockchain.evm_blockchain_interface import EVMBlockchainInterface
 
 # Configuration class
 class NodeConfig:
@@ -19,7 +20,7 @@ class NodeConfig:
         self.node_id = node_id
         self.node_signature = node_signature
         self.initial_peers = initial_peers
-        
+
 class Node:
     def __init__(self, config):
         self.config = config
