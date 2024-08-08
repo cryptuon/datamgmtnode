@@ -1,5 +1,5 @@
 from blockchain.blockchain_interface import BlockchainInterface
-import Web3
+from web3 import Web3
 
 class EVMBlockchainInterface(BlockchainInterface):
     def __init__(self, network_url, private_key):

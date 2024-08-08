@@ -1,5 +1,5 @@
 import asyncio
-from node import Node, NodeConfig
+from services.node import Node, NodeConfig
 
 async def main():
     config = NodeConfig(

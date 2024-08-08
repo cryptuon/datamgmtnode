@@ -4,6 +4,8 @@ import time
 import hashlib
 from cryptography.fernet import Fernet
 from blockchain.evm_blockchain_interface import EVMBlockchainInterface
+import sqlite3
+from services.data_manager import DataManager
 
 # Configuration class
 class NodeConfig:
