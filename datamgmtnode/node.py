@@ -1,0 +1,137 @@
+# Node
+import asyncio
+import time
+import hashlib
+from cryptography.fernet import Fernet
+
+# Configuration class
+class NodeConfig:
+    def __init__(self, blockchain_type, blockchain_url, private_key, native_token_address, 
+                 db_path, sqlite_db_path, p2p_port, plugin_dir, node_id, node_signature, initial_peers):
+        self.blockchain_type = blockchain_type
+        self.blockchain_url = blockchain_url
+        self.private_key = private_key
+        self.native_token_address = native_token_address
+        self.db_path = db_path
+        self.sqlite_db_path = sqlite_db_path
+        self.p2p_port = p2p_port
+        self.plugin_dir = plugin_dir
+        self.node_id = node_id
+        self.node_signature = node_signature
+        self.initial_peers = initial_peers
+        
+class Node:
+    def __init__(self, config):
+        self.config = config
+        self.blockchain_interface = self._init_blockchain_interface()
+        self.db_connection = self._init_database()
+        self.data_manager = DataManager(config.db_path)
+        self.token_manager = TokenManager(self.blockchain_interface, config.native_token_address)
+        self.payment_processor = PaymentProcessor(self.blockchain_interface, self.token_manager)
+        self.compliance_manager = ComplianceManager(self.blockchain_interface)
+        self.authorization_module = AuthorizationModule(self.db_connection)
+        self.p2p_network = P2PNetwork(self, config.p2p_port, config.initial_peers)
+        self.plugin_manager = PluginManager(self, config.plugin_dir)
+        self.internal_api = InternalAPI(self)
+        self.external_api = ExternalAPI(self)
+        self.encryption_key = Fernet.generate_key()
+        self.cipher_suite = Fernet(self.encryption_key)
+
+    def _init_blockchain_interface(self):
+        if self.config.blockchain_type == 'evm':
+            return EVMBlockchainInterface(self.config.blockchain_url, self.config.private_key)
+        else:
+            raise ValueError(f"Unsupported blockchain type: {self.config.blockchain_type}")
+
+    def _init_database(self):
+        conn = sqlite3.connect(self.config.sqlite_db_path)
+        conn.execute('''CREATE TABLE IF NOT EXISTS authorized_users
+                        (user_id TEXT PRIMARY KEY, public_key TEXT)''')
+        conn.commit()
+        return conn
+
+    async def start(self):
+        if not self.blockchain_interface.connect():
+            raise ConnectionError("Failed to connect to the blockchain")
+        
+        self.plugin_manager.load_plugins()
+        
+        await asyncio.gather(
+            self.p2p_network.start(),
+            self.internal_api.start(),
+            self.external_api.start()
+        )
+
+    async def stop(self):
+        self.plugin_manager.shutdown_plugins()
+        self.blockchain_interface.disconnect()
+        self.db_connection.close()
+        self.data_manager.close()
+        await self.p2p_network.stop()
+
+    def change_blockchain(self, new_blockchain_type, new_blockchain_url, new_private_key):
+        self.blockchain_interface.disconnect()
+        self.config.blockchain_type = new_blockchain_type
+        self.config.blockchain_url = new_blockchain_url
+        self.config.private_key = new_private_key
+        self.blockchain_interface = self._init_blockchain_interface()
+        if not self.blockchain_interface.connect():
+            raise ConnectionError("Failed to connect to the new blockchain")
+        self.token_manager.update_blockchain_interface(self.blockchain_interface)
+        self.payment_processor.update_blockchain_interface(self.blockchain_interface)
+        self.compliance_manager.update_blockchain_interface(self.blockchain_interface)
+
+    def get_native_token_address(self):
+        return self.config.native_token_address
+    
+    async def share_data(self, data, recipient, payment_token=None, payment_amount=None):
+        data_hash = self._hash_data(data)
+
+        if not self.authorization_module.authorize_transfer(data_hash, self.config.node_signature, self.config.node_id):
+            raise ValueError("Unauthorized data transfer")
+
+        if payment_token and payment_amount:
+            success, tx_hash = self.payment_processor.process_payment(
+                recipient, self.blockchain_interface.account.address,
+                payment_amount, payment_token
+            )
+            if not success:
+                raise ValueError("Payment failed")
+
+        self.data_manager.store_data(data_hash, data)
+        await self.p2p_network.send_data(data_hash, data)
+
+        event_data = {
+            'data_hash': data_hash,
+            'recipient': recipient,
+            'payment_tx_hash': tx_hash if payment_token else None,
+            'timestamp': int(time.time())
+        }
+        compliance_tx_hash = self.compliance_manager.record_compliance_event('data_share', event_data)
+
+        return compliance_tx_hash
+
+    def _hash_data(self, data):
+        return hashlib.sha256(str(data).encode()).hexdigest()
+
+    def encrypt_data(self, data):
+        return self.cipher_suite.encrypt(str(data).encode()).decode()
+
+    def decrypt_data(self, encrypted_data):
+        return self.cipher_suite.decrypt(encrypted_data.encode()).decode()
+
+    async def on_data_received(self, data_hash, data):
+        # This method can be overridden or extended to handle incoming data
+        print(f"Received data with hash: {data_hash}")
+        # You might want to trigger some events, update UI, or process the data further
+
+    async def get_shared_data(self, data_hash):
+        # First, try to get the data from local storage
+        data = self.data_manager.get_data(data_hash)
+        if data is None:
+            # If not found locally, try to fetch from the P2P network
+            data = await self.p2p_network.get_data(data_hash)
+            if data:
+                # If found on the network, store it locally for future use
+                self.data_manager.store_data(data_hash, data)
+        return data
