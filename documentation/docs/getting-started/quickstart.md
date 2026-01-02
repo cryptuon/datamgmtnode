@@ -18,8 +18,19 @@ You should see:
 2024-01-15 10:30:01 - __main__ - INFO - Node started successfully
 2024-01-15 10:30:01 - __main__ - INFO -   - Internal API: http://localhost:8080
 2024-01-15 10:30:01 - __main__ - INFO -   - External API: http://0.0.0.0:8081
+2024-01-15 10:30:01 - __main__ - INFO -   - Dashboard API: http://localhost:8082
 2024-01-15 10:30:01 - __main__ - INFO -   - P2P Port: 8000
 2024-01-15 10:30:01 - __main__ - INFO - Press Ctrl+C to stop the node
+```
+
+### Command-Line Options
+
+```bash
+# Start without the web dashboard
+poetry run python datamgmtnode/main.py --no-dashboard
+
+# Launch the Terminal UI instead
+poetry run python datamgmtnode/main.py --tui
 ```
 
 ## Check Node Health
@@ -170,8 +181,31 @@ Press `Ctrl+C` to gracefully stop the node:
 2024-01-15 11:30:01 - __main__ - INFO - Node stopped gracefully.
 ```
 
+## Access the Dashboard
+
+Once your node is running, you can monitor it through:
+
+=== "Web Dashboard"
+
+    Open [http://localhost:8082](http://localhost:8082) in your browser.
+
+    !!! note
+        The web dashboard must be built first. See [Installation](installation.md#build-web-dashboard-optional).
+
+=== "Terminal UI"
+
+    Start the TUI in a separate terminal:
+
+    ```bash
+    poetry run python -m datamgmtnode.tui
+    ```
+
+    Use keyboard shortcuts to navigate: `m` (main), `h` (health), `t` (tokens), `n` (network), `q` (quit).
+
 ## Next Steps
 
 - [Configuration Guide](configuration.md) - Customize your node
+- [Web Dashboard](../user-guide/web-dashboard.md) - Browser-based monitoring
+- [Terminal UI](../user-guide/terminal-ui.md) - Command-line monitoring
 - [API Reference](../user-guide/api-reference.md) - Full API documentation
 - [P2P Network](../user-guide/p2p-network.md) - Connect to more peers

@@ -56,15 +56,21 @@ nav:
     - Configuration: getting-started/configuration.md
   - User Guide:
     - Overview: user-guide/overview.md
+    - Web Dashboard: user-guide/web-dashboard.md
+    - Terminal UI: user-guide/terminal-ui.md
     - Data Sharing: user-guide/data-sharing.md
     - API Reference: user-guide/api-reference.md
     - P2P Network: user-guide/p2p-network.md
   - Operations:
     - Deployment: operations/deployment.md
     - Monitoring: operations/monitoring.md
+    - Performance: operations/performance.md
     - Security: operations/security.md
+    - Troubleshooting: operations/troubleshooting.md
   - Development:
     - Architecture: development/architecture.md
+    - Plugin Development: development/plugins.md
+    - Smart Contracts: development/smart-contracts.md
     - Contributing: development/contributing.md
     - Testing: development/testing.md
 

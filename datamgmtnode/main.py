@@ -1,3 +1,4 @@
+import argparse
 import asyncio
 import os
 import signal
@@ -65,21 +66,33 @@ async def shutdown(node, loop, signal_received=None):
         await asyncio.gather(*tasks, return_exceptions=True)
 
 
-async def main():
-    config = load_config()
+def parse_args():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        description='DataMgmt Node - Decentralized data management system'
+    )
+    parser.add_argument(
+        '--tui',
+        action='store_true',
+        help='Launch the Terminal User Interface instead of server mode'
+    )
+    parser.add_argument(
+        '--no-dashboard',
+        action='store_true',
+        help='Disable the web dashboard API'
+    )
+    parser.add_argument(
+        '--api-url',
+        type=str,
+        default='http://localhost:8082',
+        help='Dashboard API URL for TUI mode (default: http://localhost:8082)'
+    )
+    return parser.parse_args()
 
-    # Validate configuration before starting
-    try:
-        config.validate()
-        logger.info("Configuration validated successfully")
-    except ConfigurationError as e:
-        logger.error(f"Configuration error: {e}")
-        return
 
-    if not config.private_key:
-        logger.warning("No private key configured. Set PRIVATE_KEY in .env file.")
-
-    node = Node(config)
+async def run_server(config, enable_dashboard: bool = True):
+    """Run the node in server mode."""
+    node = Node(config, enable_dashboard=enable_dashboard)
     loop = asyncio.get_running_loop()
     shutdown_event = asyncio.Event()
 
@@ -101,7 +114,9 @@ async def main():
         logger.info("Node started successfully")
         logger.info(f"  - Internal API: http://localhost:8080")
         logger.info(f"  - External API: http://0.0.0.0:8081")
-        logger.info(f"  - P2P Port: {config.p2p_port}")
+        if enable_dashboard:
+            logger.info(f"  - Dashboard:    http://localhost:8082")
+        logger.info(f"  - P2P Port:     {config.p2p_port}")
         logger.info("Press Ctrl+C to stop the node")
 
         # Wait for shutdown signal
@@ -111,6 +126,43 @@ async def main():
         logger.error(f"Unexpected error: {e}")
     finally:
         await shutdown(node, loop)
+
+
+def run_tui(api_url: str):
+    """Run the Terminal User Interface."""
+    try:
+        from tui.app import DataMgmtTUI
+    except ImportError:
+        logger.error("TUI dependencies not installed. Run: poetry install")
+        return
+
+    logger.info(f"Starting TUI, connecting to {api_url}")
+    app = DataMgmtTUI(api_url=api_url)
+    app.run()
+
+
+async def main():
+    args = parse_args()
+    config = load_config()
+
+    # Validate configuration before starting
+    try:
+        config.validate()
+        logger.info("Configuration validated successfully")
+    except ConfigurationError as e:
+        logger.error(f"Configuration error: {e}")
+        return
+
+    if not config.private_key:
+        logger.warning("No private key configured. Set PRIVATE_KEY in .env file.")
+
+    if args.tui:
+        # Run in TUI mode
+        run_tui(args.api_url)
+    else:
+        # Run in server mode
+        enable_dashboard = not args.no_dashboard
+        await run_server(config, enable_dashboard=enable_dashboard)
 
 
 if __name__ == "__main__":

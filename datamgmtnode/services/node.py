@@ -16,6 +16,8 @@ from services.key_manager import KeyManager
 from network.p2p_network import P2PNetwork
 from api.internal_api import InternalAPI
 from api.external_api import ExternalAPI
+from api.dashboard_api import DashboardAPI
+from dashboard.event_bus import EventBus, Event, EventType
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +105,7 @@ class NodeConfig:
         return True
 
 class Node:
-    def __init__(self, config):
+    def __init__(self, config, enable_dashboard: bool = True):
         self.config = config
         self.blockchain_interface = self._init_blockchain_interface()
         self.db_connection = self._init_database()
@@ -116,6 +118,19 @@ class Node:
         self.plugin_manager = PluginManager(self, config.plugin_dir)
         self.internal_api = InternalAPI(self)
         self.external_api = ExternalAPI(self)
+
+        # Initialize event bus for real-time dashboard updates
+        self.event_bus = EventBus()
+
+        # Initialize dashboard API (TUI and web interface)
+        self.enable_dashboard = enable_dashboard
+        if enable_dashboard:
+            self.dashboard_api = DashboardAPI(self, self.event_bus)
+        else:
+            self.dashboard_api = None
+
+        # Status update task handle
+        self._status_update_task = None
 
         # Initialize secure key management
         self.key_manager = KeyManager(config.data_dir)
@@ -138,18 +153,51 @@ class Node:
     async def start(self):
         if not self.blockchain_interface.connect():
             raise ConnectionError("Failed to connect to the blockchain")
-        
+
         self.plugin_manager.load_plugins()
-        
-        await asyncio.gather(
+
+        # Start core services
+        services = [
             self.p2p_network.start(),
             self.internal_api.start(),
             self.external_api.start()
-        )
+        ]
+
+        # Add dashboard API if enabled
+        if self.enable_dashboard and self.dashboard_api:
+            services.append(self.dashboard_api.start())
+
+        await asyncio.gather(*services)
+
+        # Publish node started event
+        await self.event_bus.publish(Event(
+            type=EventType.NODE_STARTED,
+            data={'node_id': self.config.node_id}
+        ))
+
+        # Start periodic status updates for dashboard
+        self._status_update_task = asyncio.create_task(self._status_update_loop())
 
     async def stop(self):
         """Stop all node components with proper error handling."""
         errors = []
+
+        # Publish stopping event
+        try:
+            await self.event_bus.publish(Event(
+                type=EventType.NODE_STOPPING,
+                data={'node_id': self.config.node_id}
+            ))
+        except Exception as e:
+            logger.error(f"Error publishing stop event: {e}")
+
+        # Cancel status update task
+        if self._status_update_task:
+            self._status_update_task.cancel()
+            try:
+                await self._status_update_task
+            except asyncio.CancelledError:
+                pass
 
         # Stop APIs first (they depend on other services)
         try:
@@ -163,6 +211,14 @@ class Node:
         except Exception as e:
             logger.error(f"Error stopping external API: {e}")
             errors.append(e)
+
+        # Stop dashboard API
+        if self.dashboard_api:
+            try:
+                await self.dashboard_api.stop()
+            except Exception as e:
+                logger.error(f"Error stopping dashboard API: {e}")
+                errors.append(e)
 
         # Stop P2P network
         try:
@@ -222,13 +278,36 @@ class Node:
         if not self.authorization_module.authorize_transfer(data_hash, self.config.node_signature, self.config.node_id):
             raise ValueError("Unauthorized data transfer")
 
+        tx_hash = None
         if payment_token and payment_amount:
             success, tx_hash = self.payment_processor.process_payment(
                 recipient, self.blockchain_interface.account.address,
                 payment_amount, payment_token
             )
             if not success:
+                # Publish transfer failed event
+                await self.event_bus.publish(Event(
+                    type=EventType.TRANSFER_FAILED,
+                    data={
+                        'recipient': recipient,
+                        'amount': str(payment_amount),
+                        'token': payment_token,
+                        'reason': 'Payment processing failed'
+                    }
+                ))
                 raise ValueError("Payment failed")
+
+            # Publish transfer completed event
+            await self.event_bus.publish(Event(
+                type=EventType.TRANSFER_COMPLETED,
+                data={
+                    'tx_hash': tx_hash,
+                    'from': self.blockchain_interface.account.address,
+                    'to': recipient,
+                    'amount': str(payment_amount),
+                    'token': payment_token
+                }
+            ))
 
         self.data_manager.store_data(data_hash, data)
         await self.p2p_network.send_data(data_hash, data)
@@ -241,7 +320,51 @@ class Node:
         }
         compliance_tx_hash = self.compliance_manager.record_compliance_event('data_share', event_data)
 
+        # Publish data shared event
+        await self.event_bus.publish(Event(
+            type=EventType.DATA_SHARED,
+            data={
+                'data_hash': data_hash,
+                'recipient': recipient,
+                'compliance_tx_hash': compliance_tx_hash,
+                'timestamp': int(time.time())
+            }
+        ))
+
         return compliance_tx_hash
+
+    async def _status_update_loop(self):
+        """Periodically publish status updates for dashboard."""
+        while True:
+            try:
+                await asyncio.sleep(10)  # Update every 10 seconds
+
+                # Publish health update
+                blockchain_connected = self.blockchain_interface.w3 is not None
+                p2p_running = self.p2p_network.is_running
+
+                await self.event_bus.publish(Event(
+                    type=EventType.HEALTH_UPDATE,
+                    data={
+                        'status': 'healthy' if (blockchain_connected and p2p_running) else 'degraded',
+                        'components': {
+                            'blockchain': 'connected' if blockchain_connected else 'disconnected',
+                            'p2p_network': 'running' if p2p_running else 'stopped',
+                            'encryption': 'initialized'
+                        }
+                    }
+                ))
+
+                # Publish network stats update
+                await self.event_bus.publish(Event(
+                    type=EventType.NETWORK_STATS_UPDATE,
+                    data=self.p2p_network.get_network_stats()
+                ))
+
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error(f"Status update error: {e}")
 
     def _hash_data(self, data):
         return hashlib.sha256(str(data).encode()).hexdigest()
@@ -253,9 +376,17 @@ class Node:
         return self.cipher_suite.decrypt(encrypted_data.encode()).decode()
 
     async def on_data_received(self, data_hash, data):
-        # This method can be overridden or extended to handle incoming data
+        """Handle incoming data from the P2P network."""
         logger.info(f"Received data with hash: {data_hash}")
-        # You might want to trigger some events, update UI, or process the data further
+
+        # Publish data received event for dashboard
+        await self.event_bus.publish(Event(
+            type=EventType.DATA_RECEIVED,
+            data={
+                'data_hash': data_hash,
+                'timestamp': int(time.time())
+            }
+        ))
 
     async def get_shared_data(self, data_hash):
         # First, try to get the data from local storage

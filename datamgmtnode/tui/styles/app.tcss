@@ -1,0 +1,278 @@
+/* DataMgmt Node TUI Styles */
+
+/* Screen Styles */
+Screen {
+    background: $surface;
+}
+
+#screen-title {
+    text-align: center;
+    text-style: bold;
+    padding: 1;
+    background: $primary;
+    color: $text;
+    width: 100%;
+    margin-bottom: 1;
+}
+
+/* Section Styles */
+.section-title {
+    text-style: bold;
+    padding: 0 1;
+    margin-top: 1;
+    color: $text-muted;
+}
+
+/* Stat Card Styles */
+.stat-card {
+    width: 1fr;
+    height: 5;
+    border: round $primary;
+    padding: 1;
+    text-align: center;
+    margin: 1;
+    background: $surface-darken-1;
+}
+
+.stat-card.success {
+    border: round $success;
+}
+
+.stat-card.warning {
+    border: round $warning;
+}
+
+.stat-card.error {
+    border: round $error;
+}
+
+.stat-title {
+    text-style: bold;
+    color: $text-muted;
+}
+
+.stat-value {
+    text-style: bold;
+    color: $text;
+    margin-top: 1;
+}
+
+.stat-label {
+    color: $text-muted;
+}
+
+.stat-value.success {
+    color: $success;
+}
+
+/* Stats Row */
+#stats-row {
+    height: auto;
+    padding: 1;
+}
+
+/* Container Styles */
+#main-container,
+#health-container,
+#tokens-container,
+#transfers-container,
+#data-container,
+#compliance-container,
+#network-container {
+    padding: 1;
+}
+
+/* Components Grid */
+#components-grid {
+    padding: 1;
+    margin: 1;
+}
+
+#components-grid Static {
+    padding: 0 1;
+}
+
+/* Events List */
+#events-list {
+    height: auto;
+    max-height: 12;
+    padding: 1;
+    border: round $primary-darken-1;
+    margin: 1;
+    overflow-y: auto;
+}
+
+.event-item {
+    padding: 0 1;
+}
+
+/* Status Row */
+.status-row {
+    height: auto;
+    padding: 1;
+    layout: horizontal;
+}
+
+.component-label {
+    width: 30%;
+    text-style: bold;
+}
+
+.status-value {
+    width: 70%;
+}
+
+/* DataTable Styles */
+DataTable {
+    height: 1fr;
+    margin: 1;
+}
+
+DataTable > .datatable--header {
+    background: $primary;
+    text-style: bold;
+}
+
+DataTable > .datatable--cursor {
+    background: $secondary;
+}
+
+/* Form Styles */
+Input {
+    margin: 0 1 1 1;
+}
+
+TextArea {
+    height: 8;
+    margin: 0 1 1 1;
+}
+
+Button {
+    margin: 1;
+}
+
+#balance-form,
+#button-row,
+#share-buttons,
+#retrieve-buttons,
+#filter-buttons {
+    layout: horizontal;
+    height: auto;
+    padding: 1;
+}
+
+#balance-form Input {
+    width: 70%;
+}
+
+#balance-form Button {
+    width: 30%;
+}
+
+/* Result Containers */
+#balance-result,
+#share-result,
+#retrieve-result,
+#result-container {
+    padding: 1;
+    margin: 1;
+    min-height: 3;
+    border: round $primary-darken-2;
+}
+
+/* Filter Section */
+#filter-section {
+    height: auto;
+    padding: 1;
+    layout: horizontal;
+}
+
+#filter-input-container {
+    width: 60%;
+}
+
+#filter-buttons {
+    width: 40%;
+}
+
+/* Peers Header */
+#peers-header {
+    height: auto;
+    padding: 1;
+}
+
+#peers-header Checkbox {
+    margin-left: 2;
+}
+
+/* Transfers History */
+#transfers-list {
+    padding: 1;
+    min-height: 5;
+    border: round $primary-darken-2;
+    margin: 1;
+}
+
+.history-item {
+    padding: 0 1;
+}
+
+/* Form Rows */
+#from-row,
+#to-row,
+#amount-row,
+#token-row,
+#recipient-row,
+#data-row,
+#hash-row {
+    height: auto;
+    padding: 0 1;
+}
+
+#from-row Label,
+#to-row Label,
+#amount-row Label,
+#token-row Label,
+#recipient-row Label,
+#data-row Label,
+#hash-row Label {
+    width: 20%;
+    padding: 1;
+}
+
+#from-row Input,
+#to-row Input,
+#amount-row Input,
+#token-row Input,
+#recipient-row Input,
+#hash-row Input {
+    width: 80%;
+}
+
+#data-row TextArea {
+    width: 80%;
+}
+
+/* Statistics Container */
+#stats-container {
+    padding: 1;
+    layout: horizontal;
+}
+
+#stats-container Label {
+    margin-right: 3;
+}
+
+/* Overview Section */
+#overview-section {
+    border: round $primary-darken-1;
+    margin: 1;
+    padding: 1;
+}
+
+/* Components Section */
+#components-section {
+    border: round $primary-darken-1;
+    margin: 1;
+    padding: 1;
+}

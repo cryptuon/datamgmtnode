@@ -4,12 +4,13 @@ Complete reference for DataMgmt Node APIs.
 
 ## Overview
 
-DataMgmt Node exposes two REST APIs:
+DataMgmt Node exposes three REST APIs:
 
 | API | Default Port | Purpose |
 |-----|--------------|---------|
 | Internal API | 8080 | Node management, bound to localhost |
 | External API | 8081 | Data sharing, publicly accessible |
+| Dashboard API | 8082 | Web dashboard, TUI, WebSocket for real-time updates |
 
 ## Authentication
 
@@ -460,3 +461,151 @@ All APIs use consistent error responses:
   "error": "Internal server error"
 }
 ```
+
+---
+
+## Dashboard API (Port 8082)
+
+The Dashboard API provides a unified interface for the web dashboard and TUI, including WebSocket support for real-time updates.
+
+### Dashboard Info
+
+Get dashboard-specific information.
+
+```
+GET /api/dashboard/info
+```
+
+**Response:**
+
+```json
+{
+  "node_id": "node1",
+  "websocket_clients": 2,
+  "event_history_size": 45,
+  "api_version": "1.0.0",
+  "ports": {
+    "internal_api": 8080,
+    "external_api": 8081,
+    "dashboard": 8082
+  }
+}
+```
+
+---
+
+### WebSocket Connection
+
+Connect for real-time event streaming.
+
+```
+GET /ws
+```
+
+Upgrade to WebSocket connection. Once connected, the server sends:
+
+1. Connection acknowledgment
+2. Recent event history (last 20 events)
+3. Real-time events as they occur
+
+**Connection Message:**
+
+```json
+{
+  "type": "connected",
+  "data": {
+    "message": "WebSocket connection established",
+    "history_available": 45
+  }
+}
+```
+
+**Event Message Format:**
+
+```json
+{
+  "type": "token.transfer_completed",
+  "data": {
+    "from": "0x742d...",
+    "to": "0x853d...",
+    "amount": "1000000000000000000"
+  },
+  "timestamp": 1705312200.123
+}
+```
+
+### WebSocket Client Messages
+
+**Ping:**
+
+```json
+{"type": "ping"}
+```
+
+Response: `{"type": "pong"}`
+
+**Request History:**
+
+```json
+{"type": "get_history", "count": 50}
+```
+
+Response:
+
+```json
+{
+  "type": "history",
+  "data": {
+    "events": [...],
+    "count": 50
+  }
+}
+```
+
+---
+
+### Event Types
+
+Events broadcast via WebSocket:
+
+| Event Type | Description |
+|------------|-------------|
+| `health.update` | Node health status changed |
+| `health.component_change` | Individual component status changed |
+| `token.balance_update` | Token balance changed |
+| `token.transfer_completed` | Token transfer succeeded |
+| `token.transfer_failed` | Token transfer failed |
+| `token.added` | New token added to supported list |
+| `data.shared` | Data was shared with recipient |
+| `data.received` | Data was received from peer |
+| `data.verified` | Data compliance was verified |
+| `compliance.event` | Compliance event recorded |
+| `network.peer_connected` | New peer connected |
+| `network.peer_disconnected` | Peer disconnected |
+| `network.peer_health` | Peer health status updated |
+| `network.stats_update` | Network statistics updated |
+| `system.node_started` | Node started |
+| `system.node_stopping` | Node shutting down |
+| `system.error` | System error occurred |
+
+---
+
+### Proxied Endpoints
+
+The Dashboard API also proxies all Internal and External API endpoints under the `/api` prefix:
+
+| Endpoint | Proxied From |
+|----------|--------------|
+| `GET /api/health` | Internal API |
+| `GET /api/balance/{address}` | Internal API |
+| `POST /api/transfer` | Internal API |
+| `GET /api/tokens` | Internal API |
+| `POST /api/tokens` | Internal API |
+| `POST /api/share_data` | External API |
+| `GET /api/data/{data_hash}` | External API |
+| `GET /api/verify_data/{data_hash}` | External API |
+| `GET /api/compliance_history` | External API |
+| `GET /api/network/stats` | External API |
+| `GET /api/network/peers` | External API |
+
+This allows web dashboard and TUI to access all node functionality through a single endpoint.

@@ -11,6 +11,10 @@ Before installing DataMgmt Node, ensure you have:
 - **LevelDB** or **RocksDB** for data storage
 - Access to an **EVM-compatible blockchain** (Ethereum, Polygon, etc.)
 
+**Optional (for web dashboard):**
+
+- **Node.js 18+** and npm (required to build the web dashboard)
+
 ## Install Dependencies
 
 ### Ubuntu/Debian
@@ -22,6 +26,10 @@ sudo apt install -y python3 python3-pip libleveldb-dev
 
 # Install Poetry
 curl -sSL https://install.python-poetry.org | python3 -
+
+# Optional: Install Node.js for web dashboard
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
 ```
 
 ### macOS
@@ -32,6 +40,9 @@ brew install python@3.12 leveldb
 
 # Install Poetry
 curl -sSL https://install.python-poetry.org | python3 -
+
+# Optional: Install Node.js for web dashboard
+brew install node
 ```
 
 ### Windows
@@ -40,6 +51,8 @@ curl -sSL https://install.python-poetry.org | python3 -
 # Install Python from python.org
 # Install Poetry
 (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
+
+# Optional: Install Node.js for web dashboard from https://nodejs.org/
 ```
 
 ## Install DataMgmt Node
@@ -102,8 +115,23 @@ You should see all tests passing:
 ========================= 173 passed in 4.76s =========================
 ```
 
+## Build Web Dashboard (Optional)
+
+If you want to use the web-based dashboard, build it after installation:
+
+```bash
+# Build the Vue.js dashboard
+python scripts/build_dashboard.py
+```
+
+This compiles the frontend and copies it to `datamgmtnode/dashboard/static/`. The dashboard will then be served automatically when you start the node.
+
+See [Web Dashboard](../user-guide/web-dashboard.md) for more details.
+
 ## Next Steps
 
 - [Quick Start Guide](quickstart.md) - Share your first data
 - [Configuration Reference](configuration.md) - Full configuration options
+- [Web Dashboard](../user-guide/web-dashboard.md) - Browser-based interface
+- [Terminal UI](../user-guide/terminal-ui.md) - Command-line interface
 - [Security Best Practices](../operations/security.md) - Secure your node

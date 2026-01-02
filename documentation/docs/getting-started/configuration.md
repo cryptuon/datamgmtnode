@@ -82,6 +82,7 @@ INITIAL_PEERS=http://peer1.example.com:8000,http://peer2.example.com:8000
 | `INTERNAL_API_PORT` | No | `8080` | Port for internal API |
 | `EXTERNAL_API_HOST` | No | `0.0.0.0` | Host for external API |
 | `EXTERNAL_API_PORT` | No | `8081` | Port for external API |
+| `DASHBOARD_API_PORT` | No | `8082` | Port for dashboard API (web UI, TUI, WebSocket) |
 
 ### Plugin Configuration
 
@@ -115,6 +116,11 @@ INITIAL_PEERS=http://bootstrap1.datamgmt.io:8000,http://bootstrap2.datamgmt.io:8
 # Node Identity
 NODE_ID=production-node-1
 NODE_SIGNATURE=
+
+# APIs
+INTERNAL_API_PORT=8080
+EXTERNAL_API_PORT=8081
+DASHBOARD_API_PORT=8082
 
 # Plugins
 PLUGIN_DIR=./plugins

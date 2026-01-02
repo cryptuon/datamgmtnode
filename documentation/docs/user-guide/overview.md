@@ -77,6 +77,18 @@ All operations are recorded on the blockchain:
 |-----|------|---------|
 | **Internal API** | 8080 | Node management, token operations |
 | **External API** | 8081 | Data sharing, public endpoints |
+| **Dashboard API** | 8082 | Web dashboard, TUI, WebSocket |
+
+### User Interfaces
+
+DataMgmt Node provides two interfaces for monitoring and management:
+
+| Interface | Description |
+|-----------|-------------|
+| **[Web Dashboard](web-dashboard.md)** | Browser-based Vue.js dashboard with real-time updates |
+| **[Terminal UI](terminal-ui.md)** | Command-line dashboard built with Python Textual |
+
+Both interfaces connect to the Dashboard API and receive real-time updates via WebSocket.
 
 ### Network
 
@@ -153,6 +165,8 @@ is_verified = response.json()["verified"]
 
 ## Next Steps
 
+- [Web Dashboard](web-dashboard.md) - Browser-based monitoring interface
+- [Terminal UI](terminal-ui.md) - Command-line dashboard
 - [Data Sharing Guide](data-sharing.md) - Detailed data sharing workflows
 - [API Reference](api-reference.md) - Complete API documentation
 - [Security Guide](../operations/security.md) - Security best practices
