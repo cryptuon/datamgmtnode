@@ -1,4 +1,8 @@
 import os
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class DataManager:
     def __init__(self, db_path):
@@ -8,12 +12,12 @@ class DataManager:
     def _init_database(self):
         try:
             import rocksdb
-            print("Using RocksDB for data storage")
+            logger.info("Using RocksDB for data storage")
             return rocksdb.DB(self.db_path, rocksdb.Options(create_if_missing=True))
         except ImportError:
             try:
                 import plyvel
-                print("RocksDB not available. Using LevelDB for data storage")
+                logger.info("RocksDB not available. Using LevelDB for data storage")
                 return plyvel.DB(self.db_path, create_if_missing=True)
             except ImportError:
                 raise ImportError("Neither RocksDB nor LevelDB (Plyvel) are available. Please install one of them.")

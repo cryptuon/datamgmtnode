@@ -1,4 +1,9 @@
-# PluginManager
+import os
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 class PluginManager:
     def __init__(self, node, plugin_dir):
         self.node = node
@@ -16,7 +21,7 @@ class PluginManager:
                     self.plugins[module_name] = plugin
                     plugin.initialize()
                 except Exception as e:
-                    print(f"Failed to load plugin {module_name}: {e}")
+                    logger.error(f"Failed to load plugin {module_name}: {e}")
 
     def shutdown_plugins(self):
         for plugin in self.plugins.values():

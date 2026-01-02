@@ -1,0 +1,74 @@
+site_name: DataMgmt Node
+site_description: Decentralized Enterprise Data Management Platform
+site_author: DataMgmt Team
+site_url: https://datamgmtnode.example.com
+
+repo_name: datamgmtnode
+repo_url: https://github.com/example/datamgmtnode
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+
+plugins:
+  - search
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - admonition
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+  - md_in_html
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quickstart.md
+    - Configuration: getting-started/configuration.md
+  - User Guide:
+    - Overview: user-guide/overview.md
+    - Data Sharing: user-guide/data-sharing.md
+    - API Reference: user-guide/api-reference.md
+    - P2P Network: user-guide/p2p-network.md
+  - Operations:
+    - Deployment: operations/deployment.md
+    - Monitoring: operations/monitoring.md
+    - Security: operations/security.md
+  - Development:
+    - Architecture: development/architecture.md
+    - Contributing: development/contributing.md
+    - Testing: development/testing.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/example/datamgmtnode

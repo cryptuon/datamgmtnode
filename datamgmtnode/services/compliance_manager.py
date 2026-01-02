@@ -1,5 +1,6 @@
+import hashlib
 
-# ComplianceManager
+
 class ComplianceManager:
     def __init__(self, blockchain_interface):
         self.blockchain = blockchain_interface

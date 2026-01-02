@@ -1,5 +1,3 @@
-
-# PaymentProcessor
 class PaymentProcessor:
     def __init__(self, blockchain_interface, token_manager):
         self.blockchain = blockchain_interface
@@ -17,7 +15,7 @@ class PaymentProcessor:
             raise ValueError("Insufficient balance")
 
         tx_hash = self.token_manager.transfer_tokens(token_address, from_address, to_address, amount)
-        receipt = self.blockchain.w3.eth.wait_for_transaction_receipt(tx_hash)
+        receipt = self.blockchain.wait_for_receipt(tx_hash)
 
         if receipt['status'] == 1:
             return True, tx_hash

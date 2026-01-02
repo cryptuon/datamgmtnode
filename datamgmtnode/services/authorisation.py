@@ -1,5 +1,11 @@
+import logging
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.exceptions import InvalidSignature
 
-# AuthorizationModule
+logger = logging.getLogger(__name__)
+
+
 class AuthorizationModule:
     def __init__(self, db_connection):
         self.db = db_connection
@@ -12,9 +18,10 @@ class AuthorizationModule:
         if user_id not in self.authorized_keys:
             return False
 
-        public_key = rsa.PublicKey.from_pem(self.authorized_keys[user_id].encode())
-
         try:
+            public_key = serialization.load_pem_public_key(
+                self.authorized_keys[user_id].encode()
+            )
             public_key.verify(
                 signature,
                 data_hash.encode(),
@@ -25,7 +32,10 @@ class AuthorizationModule:
                 hashes.SHA256()
             )
             return True
-        except:
+        except InvalidSignature:
+            return False
+        except Exception as e:
+            logger.error(f"Authorization verification failed: {e}")
             return False
 
     def add_authorized_user(self, user_id, public_key_pem):
