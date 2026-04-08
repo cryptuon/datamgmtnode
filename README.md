@@ -22,8 +22,8 @@ This project implements a decentralized system for enterprise data management an
 
 1. Clone the repository:
    ```
-   git clone https://github.com/your-repo/decentralized-data-system.git
-   cd decentralized-data-system
+   git clone https://github.com/cryptuon/datamgmtnode.git
+   cd datamgmtnode
    ```
 
 2. Install the required dependencies:
