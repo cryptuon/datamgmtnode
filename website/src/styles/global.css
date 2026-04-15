@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+/* Custom theme variables */
+@theme {
+  --color-primary-50: oklch(0.97 0.01 250);
+  --color-primary-100: oklch(0.94 0.02 250);
+  --color-primary-200: oklch(0.88 0.04 250);
+  --color-primary-300: oklch(0.78 0.08 250);
+  --color-primary-400: oklch(0.68 0.12 250);
+  --color-primary-500: oklch(0.55 0.15 250);
+  --color-primary-600: oklch(0.48 0.14 250);
+  --color-primary-700: oklch(0.40 0.12 250);
+  --color-primary-800: oklch(0.33 0.10 250);
+  --color-primary-900: oklch(0.27 0.08 250);
+
+  --color-accent-500: oklch(0.65 0.15 285);
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+/* Base styles */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply text-gray-900 bg-white antialiased;
+}
+
+/* Prose styles for content */
+.prose {
+  @apply max-w-none;
+}
+
+.prose h1 {
+  @apply text-4xl font-bold mb-6;
+}
+
+.prose h2 {
+  @apply text-2xl font-semibold mt-8 mb-4;
+}
+
+.prose h3 {
+  @apply text-xl font-semibold mt-6 mb-3;
+}
+
+.prose p {
+  @apply mb-4 leading-relaxed;
+}
+
+.prose code {
+  @apply bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono;
+}
+
+.prose pre {
+  @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto mb-4;
+}
+
+.prose pre code {
+  @apply bg-transparent p-0;
+}
+
+.prose a {
+  @apply text-primary-600 hover:text-primary-700 underline;
+}
+
+.prose ul, .prose ol {
+  @apply mb-4 pl-6;
+}
+
+.prose li {
+  @apply mb-2;
+}
+
+.prose table {
+  @apply w-full border-collapse mb-4;
+}
+
+.prose th {
+  @apply bg-gray-100 text-left p-3 font-semibold border border-gray-200;
+}
+
+.prose td {
+  @apply p-3 border border-gray-200;
+}
+
+/* Quotable snippet highlight */
+.quotable {
+  @apply bg-primary-50 border-l-4 border-primary-500 pl-4 py-2 my-4;
+}
