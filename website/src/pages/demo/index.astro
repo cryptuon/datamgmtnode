@@ -1,0 +1,100 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import NodeStatus from '../../components/vue/NodeStatus.vue';
+import TokenChecker from '../../components/vue/TokenChecker.vue';
+import NetworkGraph from '../../components/vue/NetworkGraph.vue';
+import WebSocketEvents from '../../components/vue/WebSocketEvents.vue';
+
+// Use relative paths - nginx proxies /api to the node
+const apiUrl = import.meta.env.PUBLIC_API_URL || '/api';
+---
+
+<BaseLayout
+  title="Live Demo - DataMgmt Node"
+  description="Try DataMgmt Node live with our Sepolia testnet demo. Explore the P2P network, check token balances, and interact with the API playground."
+>
+  <!-- Hero -->
+  <section class="bg-gradient-to-b from-primary-50 to-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div class="inline-flex items-center px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-sm font-medium mb-4">
+        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        Sepolia Testnet Only
+      </div>
+      <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 tracking-tight">
+        Live Demo
+      </h1>
+      <p class="mt-6 max-w-2xl mx-auto text-xl text-gray-600">
+        Interact with a live DataMgmt Node connected to the Sepolia testnet. Explore network statistics, check balances, and test API endpoints.
+      </p>
+    </div>
+  </section>
+
+  <!-- Demo Sections -->
+  <section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-8">
+        <!-- Node Status Card -->
+        <NodeStatus client:load apiUrl={apiUrl} />
+
+        <!-- P2P Network Graph -->
+        <NetworkGraph client:load apiUrl={apiUrl} />
+      </div>
+
+      <!-- Token Balance Checker -->
+      <div class="mt-8">
+        <TokenChecker client:load apiUrl={apiUrl} />
+      </div>
+
+      <!-- API Playground Link -->
+      <div class="mt-8 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl p-8 text-white">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div>
+            <h2 class="text-2xl font-bold">API Playground</h2>
+            <p class="mt-2 text-primary-100">
+              Interactive API testing with request builder and code generation.
+            </p>
+          </div>
+          <a
+            href="/demo/playground"
+            class="inline-flex items-center px-6 py-3 bg-white text-primary-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            Open Playground
+            <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WebSocket Events -->
+  <section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">Live Events</h2>
+      <p class="text-gray-600 mb-6">Real-time event stream via WebSocket</p>
+
+      <WebSocketEvents client:load />
+    </div>
+  </section>
+
+  <!-- Safety Notice -->
+  <section class="py-8 bg-yellow-50 border-t border-b border-yellow-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-start gap-4">
+        <svg class="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <div>
+          <h3 class="font-semibold text-yellow-800">Testnet Demo</h3>
+          <p class="mt-1 text-yellow-700 text-sm">
+            This demo uses the Sepolia testnet. No real funds or sensitive data are involved.
+            The demo node is rate-limited to 10 requests per second per IP address.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,347 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const networkCode = `# Network topology example
+GET /network/peers
+
+{
+  "node_id": "a1b2c3d4e5f6...",
+  "peers": [
+    {
+      "node_id": "b2c3d4e5f6a1...",
+      "address": "192.168.1.10:8000",
+      "distance": 45,
+      "last_seen": "2026-04-14T10:29:55Z",
+      "health": "healthy"
+    },
+    {
+      "node_id": "c3d4e5f6a1b2...",
+      "address": "192.168.1.11:8000",
+      "distance": 89,
+      "last_seen": "2026-04-14T10:29:50Z",
+      "health": "healthy"
+    }
+  ],
+  "routing_table_size": 156,
+  "bucket_distribution": {
+    "0-20": 12,
+    "21-40": 28,
+    "41-60": 45,
+    "61-80": 38,
+    "81-100": 33
+  }
+}`;
+
+const configCode = `# Example .env configuration
+P2P_PORT=8000
+BOOTSTRAP_NODES=192.168.1.100:8000,192.168.1.101:8000
+K_BUCKET_SIZE=20
+ALPHA=3
+HEALTH_CHECK_INTERVAL=60`;
+---
+
+<BaseLayout
+  title="P2P Network - DataMgmt Node"
+  description="Kademlia DHT-based peer-to-peer networking for decentralized data distribution. Automatic peer discovery, health monitoring, and O(log n) routing efficiency."
+>
+  <!-- Hero -->
+  <section class="bg-gradient-to-b from-primary-50 to-white py-16 lg:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <span class="text-primary-600 font-semibold text-sm uppercase tracking-wide">Feature</span>
+        <h1 class="mt-2 text-4xl sm:text-5xl font-bold text-gray-900 tracking-tight">
+          Kademlia DHT P2P Network
+        </h1>
+        <p class="mt-6 text-xl text-gray-600 leading-relaxed">
+          DataMgmt Node uses Kademlia Distributed Hash Table (DHT) for efficient peer discovery and data routing across thousands of nodes with O(log n) lookup efficiency.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Stats -->
+  <section class="py-12 bg-white border-b border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div class="text-center">
+          <div class="text-3xl font-bold text-primary-600">10,000+</div>
+          <div class="mt-1 text-sm text-gray-600">Node Capacity</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-primary-600">O(log n)</div>
+          <div class="mt-1 text-sm text-gray-600">Lookup Efficiency</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-primary-600">&lt;100ms</div>
+          <div class="mt-1 text-sm text-gray-600">Avg Latency</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-primary-600">160-bit</div>
+          <div class="mt-1 text-sm text-gray-600">Address Space</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- What is Kademlia -->
+  <section class="py-16 lg:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto">
+        <h2 class="text-3xl font-bold text-gray-900">What is Kademlia DHT?</h2>
+        <div class="mt-6 prose prose-lg text-gray-600">
+          <p>
+            <strong>Kademlia</strong> is a distributed hash table (DHT) protocol designed for decentralized peer-to-peer networks. It uses XOR-based distance metrics to organize nodes and route queries efficiently across the network.
+          </p>
+          <p>
+            Unlike traditional client-server architectures, Kademlia enables nodes to find data and peers without central coordination. Each node maintains a routing table with contacts organized by their distance in the 160-bit address space.
+          </p>
+          <p>
+            DataMgmt Node implements a production-ready Kademlia DHT with extensions for:
+          </p>
+          <ul>
+            <li><strong>Health monitoring</strong> - Automatic detection and removal of offline peers</li>
+            <li><strong>NAT traversal</strong> - Support for nodes behind firewalls</li>
+            <li><strong>Bootstrap nodes</strong> - Configurable entry points for network joining</li>
+            <li><strong>Peer scoring</strong> - Prioritize reliable nodes in routing</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="py-16 lg:py-24 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold text-gray-900 text-center">How P2P Networking Works</h2>
+
+      <div class="mt-16 grid lg:grid-cols-2 gap-12">
+        <div class="space-y-8">
+          <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-900">Node Discovery</h3>
+                <p class="text-sm text-gray-600">Nodes join the network by contacting bootstrap nodes and populating their routing tables</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-900">XOR Distance Routing</h3>
+                <p class="text-sm text-gray-600">Queries route through progressively closer nodes using XOR distance metrics</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-900">Data Storage</h3>
+                <p class="text-sm text-gray-600">Data is stored on nodes closest to the data's hash for efficient retrieval</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-900">Health Monitoring</h3>
+                <p class="text-sm text-gray-600">Continuous peer health checks ensure routing tables stay current</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gray-900 rounded-xl p-6 text-sm font-mono text-green-400 overflow-x-auto">
+          <pre class="whitespace-pre-wrap">{networkCode}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Network Operations -->
+  <section class="py-16 lg:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold text-gray-900 text-center">Network Operations</h2>
+      <p class="mt-4 text-lg text-gray-600 text-center max-w-2xl mx-auto">
+        Kademlia DHT supports four fundamental operations that enable decentralized data management.
+      </p>
+
+      <div class="mt-12 grid md:grid-cols-2 gap-8">
+        <div class="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+            <code class="text-blue-600 font-bold">PING</code>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900">Ping</h3>
+          <p class="mt-3 text-gray-600">
+            Check if a node is online and responsive. Used for health monitoring and routing table maintenance.
+          </p>
+          <pre class="mt-4 bg-gray-100 rounded-lg p-3 text-sm font-mono overflow-x-auto">GET /network/ping/{"{node_id}"}</pre>
+        </div>
+
+        <div class="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+            <code class="text-green-600 font-bold">STORE</code>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900">Store</h3>
+          <p class="mt-3 text-gray-600">
+            Store a key-value pair on nodes closest to the key's hash. Data is replicated across multiple nodes for redundancy.
+          </p>
+          <pre class="mt-4 bg-gray-100 rounded-lg p-3 text-sm font-mono overflow-x-auto">POST /network/store</pre>
+        </div>
+
+        <div class="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
+          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+            <code class="text-purple-600 font-bold">FIND_NODE</code>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900">Find Node</h3>
+          <p class="mt-3 text-gray-600">
+            Locate nodes closest to a given ID. Returns k-closest nodes from the recipient's routing table.
+          </p>
+          <pre class="mt-4 bg-gray-100 rounded-lg p-3 text-sm font-mono overflow-x-auto">GET /network/find/{"{node_id}"}</pre>
+        </div>
+
+        <div class="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
+          <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+            <code class="text-orange-600 font-bold">FIND_VALUE</code>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900">Find Value</h3>
+          <p class="mt-3 text-gray-600">
+            Retrieve data by key. If the receiving node has the value, it returns it; otherwise, it returns closer nodes.
+          </p>
+          <pre class="mt-4 bg-gray-100 rounded-lg p-3 text-sm font-mono overflow-x-auto">GET /data/{"{hash}"}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Configuration -->
+  <section class="py-16 lg:py-24 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold text-gray-900 text-center">Network Configuration</h2>
+      <p class="mt-4 text-lg text-gray-600 text-center max-w-2xl mx-auto">
+        Fine-tune your node's P2P behavior with these configuration options.
+      </p>
+
+      <div class="mt-12 max-w-3xl mx-auto">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <table class="w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Variable</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Default</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap font-mono text-sm text-gray-900">P2P_PORT</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">8000</td>
+                <td class="px-6 py-4 text-sm text-gray-600">UDP port for P2P communication</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap font-mono text-sm text-gray-900">BOOTSTRAP_NODES</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">[]</td>
+                <td class="px-6 py-4 text-sm text-gray-600">Comma-separated list of bootstrap node addresses</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap font-mono text-sm text-gray-900">K_BUCKET_SIZE</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">20</td>
+                <td class="px-6 py-4 text-sm text-gray-600">Maximum nodes per k-bucket</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap font-mono text-sm text-gray-900">ALPHA</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">3</td>
+                <td class="px-6 py-4 text-sm text-gray-600">Concurrency factor for lookups</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap font-mono text-sm text-gray-900">HEALTH_CHECK_INTERVAL</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">60</td>
+                <td class="px-6 py-4 text-sm text-gray-600">Seconds between peer health checks</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-8 bg-gray-900 rounded-xl p-6 font-mono text-sm text-green-400">
+          <pre>{configCode}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Network Stats API -->
+  <section class="py-16 lg:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold text-gray-900 text-center">Network Monitoring API</h2>
+      <p class="mt-4 text-lg text-gray-600 text-center max-w-2xl mx-auto">
+        Monitor your node's P2P network health and performance in real-time.
+      </p>
+
+      <div class="mt-12 space-y-6 max-w-3xl mx-auto">
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <div class="flex items-center gap-3">
+            <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">GET</span>
+            <code class="text-sm font-mono">/network/stats</code>
+          </div>
+          <p class="mt-3 text-gray-600">Get comprehensive network statistics including peer count, routing table size, and message throughput.</p>
+        </div>
+
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <div class="flex items-center gap-3">
+            <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">GET</span>
+            <code class="text-sm font-mono">/network/peers</code>
+          </div>
+          <p class="mt-3 text-gray-600">List all connected peers with their health status, distance, and last seen timestamp.</p>
+        </div>
+
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <div class="flex items-center gap-3">
+            <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">WS</span>
+            <code class="text-sm font-mono">/ws</code>
+          </div>
+          <p class="mt-3 text-gray-600">WebSocket endpoint for real-time network events including peer joins, leaves, and data transfers.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-16 lg:py-24 bg-primary-600">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold text-white">Join the P2P Network</h2>
+      <p class="mt-4 text-xl text-primary-100">
+        Deploy your node and connect to the decentralized data network.
+      </p>
+      <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/getting-started" class="inline-flex items-center justify-center px-6 py-3 bg-white text-primary-600 font-semibold rounded-lg hover:bg-primary-50 transition-colors">
+          Get Started
+        </a>
+        <a href="/demo" class="inline-flex items-center justify-center px-6 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors">
+          View Network Graph
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

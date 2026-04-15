@@ -1,0 +1,88 @@
+---
+interface Props {
+  type: 'Organization' | 'SoftwareApplication' | 'FAQPage' | 'TechArticle' | 'HowTo' | 'BreadcrumbList' | 'Article' | 'Custom';
+  data?: Record<string, unknown>;
+}
+
+const { type, data = {} } = Astro.props;
+const siteUrl = 'https://datamgmtnode.cryptuon.com';
+
+const schemas: Record<string, Record<string, unknown>> = {
+  Organization: {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "DataMgmt Node",
+    "description": "Decentralized enterprise data management platform with blockchain compliance, P2P networking, and end-to-end encryption",
+    "url": siteUrl,
+    "logo": `${siteUrl}/images/logo.png`,
+    "foundingDate": "2024",
+    "sameAs": [
+      "https://github.com/cryptuon/datamgmtnode"
+    ],
+    ...data
+  },
+  SoftwareApplication: {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "DataMgmt Node",
+    "applicationCategory": "BusinessApplication",
+    "applicationSubCategory": "Data Management",
+    "operatingSystem": "Linux, macOS, Windows, Docker",
+    "softwareVersion": "1.0.0",
+    "programmingLanguage": "Python",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "featureList": [
+      "Blockchain-backed compliance audit trails",
+      "End-to-end Fernet encryption (AES-128-CBC)",
+      "Kademlia DHT P2P networking",
+      "ERC-20 token payments for data monetization",
+      "Plugin architecture for extensibility"
+    ],
+    ...data
+  },
+  FAQPage: {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": data.questions || [],
+    ...data
+  },
+  TechArticle: {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "author": { "@type": "Organization", "name": "DataMgmt Team" },
+    "publisher": { "@type": "Organization", "name": "DataMgmt Node" },
+    "proficiencyLevel": "Expert",
+    ...data
+  },
+  HowTo: {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    ...data
+  },
+  BreadcrumbList: {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": data.items || [],
+    ...data
+  },
+  Article: {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "author": { "@type": "Organization", "name": "DataMgmt Team" },
+    "publisher": { "@type": "Organization", "name": "DataMgmt Node" },
+    ...data
+  },
+  Custom: {
+    "@context": "https://schema.org",
+    ...data
+  }
+};
+
+const schema = schemas[type];
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

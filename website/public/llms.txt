@@ -1,0 +1,37 @@
+# DataMgmt Node
+
+> Decentralized enterprise data management platform combining blockchain, P2P networking (Kademlia DHT), and end-to-end encryption for secure, compliant data sharing.
+
+## Overview
+
+DataMgmt Node enables organizations to share data without centralized servers. All operations are recorded on EVM-compatible blockchains (Ethereum, Polygon, Arbitrum) for immutable audit trails.
+
+## Key Stats
+
+- Encryption: Fernet (AES-128-CBC) with PBKDF2 key derivation (480,000 iterations)
+- P2P Protocol: Kademlia DHT supporting 10,000+ nodes with O(log n) lookups
+- Supported Chains: Ethereum, Polygon, Arbitrum, Optimism, any EVM chain
+- License: MIT (fully open source)
+
+## Core Features
+
+- Blockchain-backed compliance audit trails
+- End-to-end encryption with key rotation
+- Token payments (native + ERC-20) for data monetization
+- Plugin architecture for extensibility
+- Three APIs: Internal (8080), External (8081), Dashboard (8082)
+
+## Primary Use Cases
+
+- HIPAA-compliant healthcare data exchange
+- SOX-compliant financial data sharing
+- GDPR-compliant EU data transfers
+- Supply chain document verification
+- Enterprise data monetization
+
+## Links
+
+- Docs: https://datamgmtnode.cryptuon.com/docs/
+- Demo: https://datamgmtnode.cryptuon.com/demo/
+- GitHub: https://github.com/cryptuon/datamgmtnode
+- API Reference: https://datamgmtnode.cryptuon.com/docs/api/
