@@ -31,7 +31,8 @@ DataMgmt Node enables organizations to share data without centralized servers. A
 
 ## Links
 
-- Docs: https://datamgmtnode.cryptuon.com/docs/
+- Docs: https://docs.cryptuon.com/datamgmtnode
 - Demo: https://datamgmtnode.cryptuon.com/demo/
 - GitHub: https://github.com/cryptuon/datamgmtnode
-- API Reference: https://datamgmtnode.cryptuon.com/docs/api/
+- Articles: https://datamgmtnode.cryptuon.com/articles/
+- API Reference: https://docs.cryptuon.com/datamgmtnode/user-guide/api-reference
