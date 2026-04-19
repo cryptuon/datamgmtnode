@@ -96,18 +96,22 @@ Track and verify documents across supply chain partners with cryptographic proof
 ### Enterprise Data Monetization
 Monetize proprietary datasets through token-gated access with built-in payment processing.
 
-## File List
+## Website Pages
 
-- /docs/getting-started/installation
-- /docs/getting-started/quickstart
-- /docs/user-guide/api-reference
-- /docs/user-guide/data-sharing
-- /docs/development/architecture
-- /docs/operations/security
-- /demo/playground
+- /features - Feature overview
+- /demo - Live demo with Sepolia testnet
+- /demo/playground - Interactive API playground
+- /articles - In-depth technical articles
+- /compare - Comparison with alternatives
+- /use-cases - Enterprise use cases
+- /getting-started - Quick start guide
+
+## External Documentation
+
+Full technical documentation is available at: https://docs.cryptuon.com/datamgmtnode
 
 ## Contact
 
 - Website: https://datamgmtnode.cryptuon.com
 - GitHub: https://github.com/cryptuon/datamgmtnode
-- Documentation: https://datamgmtnode.cryptuon.com/docs/
+- Documentation: https://docs.cryptuon.com/datamgmtnode

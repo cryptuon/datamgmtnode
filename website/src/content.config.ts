@@ -1,20 +1,8 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
-const docsCollection = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/docs' }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    order: z.number().default(0),
-    category: z.enum(['getting-started', 'user-guide', 'development', 'operations']).optional(),
-    tags: z.array(z.string()).default([]),
-    lastUpdated: z.string().optional(),
-  }),
-});
-
-const blogCollection = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/blog' }),
+const articlesCollection = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/articles' }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
@@ -24,6 +12,9 @@ const blogCollection = defineCollection({
     heroImage: z.string().optional(),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    // SEO fields
+    keywords: z.array(z.string()).optional(),
+    canonical: z.string().optional(),
   }),
 });
 
@@ -39,7 +30,6 @@ const comparisonsCollection = defineCollection({
 });
 
 export const collections = {
-  docs: docsCollection,
-  blog: blogCollection,
+  articles: articlesCollection,
   comparisons: comparisonsCollection,
 };
