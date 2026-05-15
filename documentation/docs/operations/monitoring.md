@@ -67,21 +67,23 @@ curl http://localhost:8081/network/stats
 {
   "total_peers": 15,
   "healthy_peers": 12,
-  "data_sent": 10485760,
-  "data_received": 5242880,
-  "uptime": 86400
+  "active_peers": 11,
+  "bootstrap_nodes": 2,
+  "avg_latency_ms": 92.3
 }
 ```
 
 ### Key Metrics to Monitor
 
-| Metric | Description | Alert Threshold |
+(Field names match `P2PNetwork.get_network_stats`,
+`datamgmtnode/network/p2p_network.py:518`.)
+
+| Metric | Description | Suggested Alert |
 |--------|-------------|-----------------|
-| `healthy_peers` | Connected healthy peers | < 3 |
-| `total_peers` | Total known peers | < 5 |
-| `uptime` | Node uptime in seconds | - |
-| `data_sent` | Bytes sent | - |
-| `data_received` | Bytes received | - |
+| `healthy_peers` | Peers passing health check | `< 3` triggers re-bootstrap loop |
+| `total_peers` | All known peers (any health) | `< 5` warning |
+| `active_peers` | Peers in the live Kademlia routing table | `< _min_peers` |
+| `avg_latency_ms` | Mean latency across healthy peers | `> 500ms` warning |
 
 ## Logging
 
@@ -131,92 +133,29 @@ ERROR - Authorization verification failed: Invalid signature
 WARNING - Rate limit exceeded for 192.168.1.100
 ```
 
-## Prometheus Integration
+## Polling-Based Alerting
 
-### Expose Metrics
+The node currently does **not** expose Prometheus metrics — there is no
+`/metrics` endpoint and `prometheus_client` is not a dependency. Treat any
+metric system as built on top of the JSON endpoints above.
 
-Add a metrics endpoint (custom implementation required):
+A minimal blackbox-style approach:
 
-```python
-# Example metrics endpoint
-from prometheus_client import Counter, Gauge, generate_latest
+```bash
+# Pseudo-alert script (run from cron / systemd timer)
+status=$(curl -s http://localhost:8080/health | jq -r .status)
+if [ "$status" != "healthy" ]; then
+  notify "DataMgmt node status: $status"
+fi
 
-requests_total = Counter('datamgmt_requests_total', 'Total requests', ['endpoint'])
-peers_connected = Gauge('datamgmt_peers_connected', 'Connected peers')
-data_operations = Counter('datamgmt_data_operations', 'Data operations', ['type'])
+healthy=$(curl -s http://localhost:8081/network/stats | jq -r .healthy_peers)
+if [ "$healthy" -lt 3 ]; then
+  notify "DataMgmt peer count low: $healthy"
+fi
 ```
 
-### Prometheus Configuration
-
-```yaml
-# prometheus.yml
-scrape_configs:
-  - job_name: 'datamgmt-node'
-    static_configs:
-      - targets: ['localhost:9090']
-    scrape_interval: 15s
-```
-
-### Grafana Dashboard
-
-Import a dashboard with these panels:
-
-1. **Node Health** - Health status over time
-2. **Peer Connections** - Connected vs healthy peers
-3. **Data Operations** - Shares, retrievals, verifications
-4. **API Latency** - Request response times
-5. **Error Rate** - Errors by type
-
-## Alerting
-
-### Alert Rules
-
-```yaml
-# alerts.yml
-groups:
-- name: datamgmt
-  rules:
-  - alert: NodeUnhealthy
-    expr: datamgmt_health_status != 1
-    for: 5m
-    labels:
-      severity: critical
-    annotations:
-      summary: "DataMgmt node is unhealthy"
-
-  - alert: LowPeerCount
-    expr: datamgmt_peers_connected < 3
-    for: 10m
-    labels:
-      severity: warning
-    annotations:
-      summary: "Low peer count: {{ $value }}"
-
-  - alert: HighErrorRate
-    expr: rate(datamgmt_errors_total[5m]) > 0.1
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: "High error rate detected"
-
-  - alert: BlockchainDisconnected
-    expr: datamgmt_blockchain_connected == 0
-    for: 2m
-    labels:
-      severity: critical
-    annotations:
-      summary: "Blockchain connection lost"
-```
-
-### Notification Channels
-
-Configure alerts to:
-
-- Email
-- Slack
-- PagerDuty
-- OpsGenie
+For richer telemetry, write a small exporter that scrapes `/health`,
+`/network/stats`, and `/api/dashboard/info` and republishes the values.
 
 ## Log Aggregation
 

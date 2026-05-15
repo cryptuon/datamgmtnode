@@ -132,12 +132,15 @@ lsof -i :8000  # P2P network
 # Kill existing process
 kill $(lsof -t -i:8080)
 
-# Or change ports in .env
-INTERNAL_API_PORT=8090
-EXTERNAL_API_PORT=8091
-DASHBOARD_API_PORT=8092
+# Or change the P2P port via env var
 P2P_PORT=8001
 ```
+
+!!! note "API ports are hard-coded"
+    Only `P2P_PORT` is honoured. The Internal/External/Dashboard API ports
+    (8080/8081/8082) are baked into the source — to move them you must edit
+    `datamgmtnode/api/{internal,external,dashboard}_api.py` (or front them
+    with a reverse proxy as `deploy/nginx.conf` does).
 
 ## P2P Network Issues
 
@@ -403,7 +406,7 @@ location /ws {
 curl http://localhost:8082/api/health
 
 # Start TUI with correct URL
-poetry run python -m datamgmtnode.tui --api-url http://localhost:8082
+poetry run python datamgmtnode/main.py --tui --api-url http://localhost:8082
 ```
 
 ## Token/Payment Issues
@@ -583,7 +586,7 @@ When reporting issues, include:
 5. Steps to reproduce
 6. Configuration (secrets redacted)
 
-Report issues at: https://github.com/example/datamgmtnode/issues
+Report issues at: <https://github.com/cryptuon/datamgmtnode/issues>
 
 ## See Also
 

@@ -65,12 +65,13 @@ DataMgmt Node is a decentralized data management system that combines blockchain
 
 ## System Requirements
 
-| Component | Minimum | Recommended |
-|-----------|---------|-------------|
-| Python | 3.10+ | 3.12+ |
-| RAM | 2 GB | 8 GB |
-| Storage | 10 GB | 100 GB+ |
-| Network | 10 Mbps | 100 Mbps |
+| Component | Minimum |
+|-----------|---------|
+| Python | 3.11+ (per `pyproject.toml`) |
+| Storage | LevelDB-capable volume |
+| Network | One reachable port for P2P (default 8000) |
+
+See [Installation](getting-started/installation.md) for the full prerequisite list.
 
 ## License
 

@@ -20,12 +20,12 @@ DataMgmt Node uses pytest for testing with 173+ tests covering:
 # Basic run
 poetry run pytest tests/ -v
 
-# With coverage
+# With coverage (pytest-cov is in the dev group of pyproject.toml)
 poetry run pytest tests/ --cov=datamgmtnode --cov-report=html
-
-# Parallel execution
-poetry run pytest tests/ -n auto
 ```
+
+For parallel execution, `pytest-xdist` is not currently in `pyproject.toml`;
+install it separately if you want `-n auto`.
 
 ### Run Specific Tests
 
@@ -277,6 +277,9 @@ poetry run pytest tests/ --cov=datamgmtnode --cov-report=xml
 
 ### Coverage Configuration
 
+`pyproject.toml` currently has no `[tool.coverage]` section. If you want to
+customise reporting, add one. A reasonable starting point:
+
 ```toml
 # pyproject.toml
 [tool.coverage.run]
@@ -291,18 +294,10 @@ exclude_lines = [
 ]
 ```
 
-### Target Coverage
-
-| Component | Target |
-|-----------|--------|
-| Services | 90%+ |
-| API | 85%+ |
-| Validation | 95%+ |
-| Overall | 85%+ |
-
 ## Continuous Integration
 
-### GitHub Actions
+No CI workflow is checked in today. A minimal GitHub Actions config that
+mirrors the local test command:
 
 ```yaml
 # .github/workflows/test.yml
@@ -314,39 +309,13 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-
-      - name: Install Poetry
-        run: pip install poetry
-
-      - name: Install dependencies
-        run: poetry install
-
-      - name: Run tests
-        run: poetry run pytest tests/ -v --cov=datamgmtnode
-
-      - name: Upload coverage
-        uses: codecov/codecov-action@v3
-```
-
-### Pre-commit Hooks
-
-```yaml
-# .pre-commit-config.yaml
-repos:
-  - repo: local
-    hooks:
-      - id: pytest
-        name: pytest
-        entry: poetry run pytest tests/ -x
-        language: system
-        pass_filenames: false
-        always_run: true
+          python-version: '3.11'
+      - run: pip install poetry
+      - run: poetry install
+      - run: poetry run pytest tests/ -v --cov=datamgmtnode
 ```
 
 ## Debugging Tests
@@ -431,4 +400,4 @@ poetry run pytest tests/ -m integration
 ## Next Steps
 
 - [Architecture](architecture.md) - Understand what to test
-- [Contributing](contributing.md) - Submit your tests
+- [Plugin Development](plugins.md) - Test your plugins in isolation

@@ -4,38 +4,67 @@ This guide covers deploying DataMgmt Node in production environments.
 
 ## Deployment Options
 
-### Docker (Recommended)
+### Bundled Docker image (recommended)
 
-Create a `Dockerfile`:
+The repo ships a production-ready, multi-stage `Dockerfile` at the project root.
+It:
+
+1. Builds the Vue 3 / Vite website from `web/` (stage `website-builder`)
+2. Installs the Python runtime + `nginx` + `supervisor` on `python:3.11-slim`
+3. Copies the node source, contracts, and plugins under `/app`
+4. Runs `nginx` (port 80, fronting both the static site and the node) and
+   `python -m datamgmtnode.main` together under `supervisord`
+   (see `deploy/supervisord.conf`)
+
+```bash
+docker build -t datamgmtnode .
+docker run -d -p 80:80 \
+  -e KEY_MASTER_PASSWORD="strong-secret" \
+  -e BLOCKCHAIN_URL="https://mainnet.infura.io/v3/YOUR-PROJECT-ID" \
+  -e PRIVATE_KEY="0x..." \
+  -e NODE_ID="prod-node-1" \
+  datamgmtnode
+```
+
+The container's healthcheck pings `/health`, which `nginx` proxies to the
+Dashboard API on port 8082 (see `deploy/nginx.conf`).
+
+### CapRover
+
+A `captain-definition` is included at the repo root, pointing at the
+`Dockerfile`. Deploying via CapRover requires no extra Docker config.
+
+### Custom Dockerfile
+
+If you want a slimmer image without the website or nginx layer, the minimum
+required is:
 
 ```dockerfile
-FROM python:3.12-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    libleveldb-dev \
+    libleveldb-dev build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry
 RUN pip install poetry
 
-# Copy project files
 COPY pyproject.toml poetry.lock ./
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi --only main
 
 COPY datamgmtnode/ ./datamgmtnode/
+COPY contracts/ ./contracts/
+COPY plugins/ ./plugins/
 
-# Create data directory
 RUN mkdir -p /data
 
 ENV DATA_DIR=/data
 ENV DB_PATH=/data/nodedb
 ENV SQLITE_DB_PATH=/data/sqlite.db
 
-EXPOSE 8080 8081 8000
+EXPOSE 8080 8081 8082 8000
 
 CMD ["python", "datamgmtnode/main.py"]
 ```
@@ -49,8 +78,9 @@ services:
   datamgmt-node:
     build: .
     ports:
-      - "8080:8080"  # Internal API
+      - "8080:8080"  # Internal API (localhost-bound by default; expose carefully)
       - "8081:8081"  # External API
+      - "8082:8082"  # Dashboard API (WebSocket + web/TUI)
       - "8000:8000"  # P2P
     volumes:
       - node-data:/data

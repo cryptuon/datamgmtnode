@@ -74,15 +74,25 @@ INITIAL_PEERS=http://peer1.example.com:8000,http://peer2.example.com:8000
 | `NODE_ID` | No | `node1` | Unique identifier for this node |
 | `NODE_SIGNATURE` | No | - | Node signature for authorization |
 
-### API Configuration
+### API Ports
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `INTERNAL_API_HOST` | No | `localhost` | Host for internal API |
-| `INTERNAL_API_PORT` | No | `8080` | Port for internal API |
-| `EXTERNAL_API_HOST` | No | `0.0.0.0` | Host for external API |
-| `EXTERNAL_API_PORT` | No | `8081` | Port for external API |
-| `DASHBOARD_API_PORT` | No | `8082` | Port for dashboard API (web UI, TUI, WebSocket) |
+The three API ports are **hard-coded** in the source — they are not currently
+read from environment variables, even though `.env.example` and
+`deploy/entrypoint.sh` reference them:
+
+| API | Port | Bind host | Defined at |
+|-----|------|-----------|------------|
+| Internal API | 8080 | `localhost` | `datamgmtnode/api/internal_api.py:32` |
+| External API | 8081 | `0.0.0.0` | `datamgmtnode/api/external_api.py:36` |
+| Dashboard API | 8082 | `0.0.0.0` | `datamgmtnode/api/dashboard_api.py:30,91` |
+
+!!! warning "Contradiction in source"
+    `INTERNAL_API_HOST`, `INTERNAL_API_PORT`, `EXTERNAL_API_HOST`,
+    `EXTERNAL_API_PORT` appear in `.env.example` and `deploy/entrypoint.sh`,
+    but `main.py` and the API constructors do not read them. Changing these
+    values has no effect today; if you need different ports, patch the source
+    or front the node with a reverse proxy (the bundled `deploy/nginx.conf`
+    is one example).
 
 ### Plugin Configuration
 
@@ -117,11 +127,6 @@ INITIAL_PEERS=http://bootstrap1.datamgmt.io:8000,http://bootstrap2.datamgmt.io:8
 NODE_ID=production-node-1
 NODE_SIGNATURE=
 
-# APIs
-INTERNAL_API_PORT=8080
-EXTERNAL_API_PORT=8081
-DASHBOARD_API_PORT=8082
-
 # Plugins
 PLUGIN_DIR=./plugins
 ```
@@ -138,41 +143,38 @@ The node validates configuration on startup. Invalid configuration will prevent 
 
 ### Validated Settings
 
-The following settings are validated:
+The following are enforced by `NodeConfig.validate()`
+(see `datamgmtnode/services/node.py:50`):
 
 - `BLOCKCHAIN_TYPE` must be `evm`
 - `BLOCKCHAIN_URL` must start with `http://`, `https://`, `ws://`, or `wss://`
-- `NATIVE_TOKEN_ADDRESS` must be a valid Ethereum address (if provided)
-- `P2P_PORT` must be between 1 and 65535
-- `NODE_ID` must be 100 characters or less
-- `INITIAL_PEERS` URLs must start with `http://` or `https://`
+- `NATIVE_TOKEN_ADDRESS` must match `^0x[a-fA-F0-9]{40}$` (if provided)
+- `P2P_PORT` must be an integer in `[1, 65535]`
+- `NODE_ID` must be a non-empty string of 100 characters or less
+- Each entry in `INITIAL_PEERS` must start with `http://` or `https://`
+- `DB_PATH`, `DATA_DIR`, and the directory of `SQLITE_DB_PATH` must be creatable
 
 ## Runtime Configuration
 
-Some settings can be changed at runtime via the Internal API:
-
-### Change Blockchain
-
-```bash
-curl -X POST http://localhost:8080/change_blockchain \
-  -H "Content-Type: application/json" \
-  -d '{
-    "blockchain_type": "evm",
-    "blockchain_url": "https://polygon-rpc.com",
-    "private_key": "0x..."
-  }'
-```
-
 ### Add Token Support
+
+New ERC-20 tokens can be added at runtime via the Internal API
+(see `datamgmtnode/api/internal_api.py:156`):
 
 ```bash
 curl -X POST http://localhost:8080/tokens \
   -H "Content-Type: application/json" \
   -d '{
     "address": "0x6B175474E89094C44Da98b954EedeaC495271d0F",
-    "abi": [...]
+    "abi": [/* ERC-20 ABI array */]
   }'
 ```
+
+!!! note "Blockchain swap is an in-process call, not an API"
+    `Node.change_blockchain(...)` exists as a Python method
+    (`datamgmtnode/services/node.py:260`) but is **not** exposed via any HTTP
+    route. To switch chains today, restart the node with a new
+    `BLOCKCHAIN_URL` / `PRIVATE_KEY`.
 
 ## Next Steps
 

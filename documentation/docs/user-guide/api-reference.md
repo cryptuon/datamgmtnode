@@ -14,11 +14,19 @@ DataMgmt Node exposes three REST APIs:
 
 ## Authentication
 
-Protected endpoints require the `X-API-Key` header:
+External API endpoints check the `X-API-Key` header via
+`ExternalAPI._verify_api_access` (`datamgmtnode/api/external_api.py:203`):
 
 ```bash
 curl -H "X-API-Key: your-api-key" http://localhost:8081/share_data
 ```
+
+!!! warning "Development-mode behaviour"
+    The current implementation **allows requests with no `X-API-Key` header at
+    all** (see `external_api.py:213-216` — "Allow unauthenticated access in
+    development mode"). If a key is supplied, it must equal `node_id` or a
+    configured `node.config.api_key`. Tighten this before any public
+    exposure.
 
 ## Rate Limiting
 
@@ -348,14 +356,17 @@ GET /compliance_history
 
 **Response:**
 
+History entries are scanned out of the last 1,000 blocks by
+`ComplianceManager.get_compliance_history` (see
+`datamgmtnode/services/compliance_manager.py:33`):
+
 ```json
 {
   "history": [
     {
-      "event_type": "data_share",
-      "data_hash": "abc123...",
-      "recipient": "0x742d...",
-      "timestamp": 1705312200,
+      "type": "data_share",
+      "hash": "abc123...",
+      "block": 19523011,
       "tx_hash": "0x1234..."
     }
   ],
@@ -368,7 +379,8 @@ GET /compliance_history
 
 ### Get Network Stats
 
-Get P2P network statistics.
+Get P2P network statistics. Response shape from
+`P2PNetwork.get_network_stats` (`datamgmtnode/network/p2p_network.py:518`):
 
 ```
 GET /network/stats
@@ -380,9 +392,9 @@ GET /network/stats
 {
   "total_peers": 10,
   "healthy_peers": 8,
-  "data_sent": 1048576,
-  "data_received": 524288,
-  "uptime": 86400
+  "active_peers": 8,
+  "bootstrap_nodes": 2,
+  "avg_latency_ms": 92.3
 }
 ```
 
@@ -404,13 +416,23 @@ GET /network/peers
 
 **Response:**
 
+Returned by `P2PNetwork.get_connected_peers` /
+`get_healthy_peers` (`datamgmtnode/network/p2p_network.py:499`):
+
 ```json
 {
   "peers": [
-    "192.168.1.10:8000",
-    "10.0.0.5:8000"
+    {
+      "host": "192.168.1.10",
+      "port": 8000,
+      "node_id": "ab12cd...",
+      "last_seen": 1705312200.5,
+      "latency_ms": 87.4,
+      "success_rate": 0.95,
+      "healthy": true
+    }
   ],
-  "count": 2
+  "count": 1
 }
 ```
 

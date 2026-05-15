@@ -36,11 +36,15 @@ sequenceDiagram
 
 ### Encryption Keys
 
-DataMgmt Node uses a hierarchical key management system:
+DataMgmt Node uses a hierarchical key management system implemented in
+`KeyManager` (see `datamgmtnode/services/key_manager.py`):
 
-- **Master Password** - Protects all encryption keys at rest
-- **Data Keys** - Fernet keys for encrypting shared data
-- **Key Versioning** - Supports key rotation without losing access to old data
+- **Master Password** (`KEY_MASTER_PASSWORD` env var) — derives a Fernet
+  cipher via PBKDF2-HMAC-SHA256 with 480,000 iterations, used to encrypt all
+  data keys at rest in `encryption_keys.json`
+- **Data Keys** — Fernet keys for encrypting shared data
+- **Key Versioning** — `KeyManager.rotate_key()` adds a new version; old
+  versions are retained so previously-encrypted data remains decryptable
 
 ### P2P Network
 

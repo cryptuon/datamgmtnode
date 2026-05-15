@@ -91,11 +91,14 @@ curl http://localhost:8081/network/stats
 {
   "total_peers": 15,
   "healthy_peers": 12,
-  "data_sent": 10485760,
-  "data_received": 5242880,
-  "uptime": 86400
+  "active_peers": 11,
+  "bootstrap_nodes": 2,
+  "avg_latency_ms": 92.3
 }
 ```
+
+The fields are produced by `P2PNetwork.get_network_stats`
+(see `datamgmtnode/network/p2p_network.py:518`).
 
 ### View Peers
 
@@ -114,11 +117,17 @@ curl "http://localhost:8081/network/peers?healthy=true"
 ```json
 {
   "peers": [
-    "192.168.1.10:8000",
-    "10.0.0.5:8000",
-    "172.16.0.20:8000"
+    {
+      "host": "192.168.1.10",
+      "port": 8000,
+      "node_id": "ab12cd...",
+      "last_seen": 1705312200.5,
+      "latency_ms": 87.4,
+      "success_rate": 0.95,
+      "healthy": true
+    }
   ],
-  "count": 3
+  "count": 1
 }
 ```
 
@@ -126,11 +135,12 @@ curl "http://localhost:8081/network/peers?healthy=true"
 
 ### Health Criteria
 
-A peer is considered healthy if:
+From `PeerInfo.is_healthy` (`datamgmtnode/network/p2p_network.py:30`), a peer
+is considered healthy when:
 
-- Responded within the last 5 minutes
-- Has a success rate above 50%
-- Or has fewer than 5 total attempts (new peer)
+- `last_seen` is within the past 300 seconds, **and**
+- Its `success_rate` is above 0.5 **or** it has fewer than 3 successes
+  recorded (new-peer grace period)
 
 ### Health Monitoring
 
@@ -184,27 +194,32 @@ async def get_data(data_hash):
 
 ### Peer Storage
 
-Known peers are persisted to `known_peers.json`:
+Known peers are persisted to `${DATA_DIR}/known_peers.json` as a JSON list of
+`PeerInfo` dicts (see `_save_peers` in `p2p_network.py:140`). Only peers seen
+within the last 24 hours are written.
 
 ```json
-{
-  "192.168.1.10:8000": {
+[
+  {
     "host": "192.168.1.10",
     "port": 8000,
+    "node_id": "ab12cd...",
     "last_seen": 1705312200.5,
-    "success_count": 100,
-    "failure_count": 5
+    "latency_ms": 87.4,
+    "failures": 5,
+    "successes": 100
   }
-}
+]
 ```
 
 ### Automatic Re-Bootstrap
 
-If the node loses all peers, it will:
+The `_rebootstrap_loop` task (see `p2p_network.py:196`) re-bootstraps when the
+routing-table peer count drops below `_min_peers = 3`:
 
-1. Wait 30 seconds
-2. Reconnect to bootstrap peers
-3. Begin peer discovery again
+1. Every `_rebootstrap_interval = 300` seconds, count active peers
+2. If below the minimum, replay the bootstrap connect sequence
+3. Update known peers from the resulting Kademlia routing table
 
 ## Troubleshooting
 

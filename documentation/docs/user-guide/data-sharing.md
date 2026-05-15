@@ -156,10 +156,9 @@ curl "http://localhost:8081/compliance_history?filters=data_share,transfer"
 {
   "history": [
     {
-      "event_type": "data_share",
-      "data_hash": "abc123...",
-      "recipient": "0x742d...",
-      "timestamp": 1705312200,
+      "type": "data_share",
+      "hash": "abc123...",
+      "block": 19523011,
       "tx_hash": "0x1234..."
     }
   ],
@@ -167,6 +166,10 @@ curl "http://localhost:8081/compliance_history?filters=data_share,transfer"
   "filters": ["data_share"]
 }
 ```
+
+Each entry comes from `ComplianceManager.get_compliance_history`
+(`datamgmtnode/services/compliance_manager.py:33`), which scans the most recent
+1,000 blocks for transactions targeting the zero address.
 
 ## Data Lifecycle
 

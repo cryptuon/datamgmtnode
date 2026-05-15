@@ -143,7 +143,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-from dashboard.event_bus import EventType
+from datamgmtnode.dashboard.event_bus import EventType, Event
 
 logger = logging.getLogger(__name__)
 
@@ -198,7 +198,7 @@ Send notifications to external services:
 import aiohttp
 import logging
 
-from dashboard.event_bus import EventType
+from datamgmtnode.dashboard.event_bus import EventType, Event
 
 logger = logging.getLogger(__name__)
 

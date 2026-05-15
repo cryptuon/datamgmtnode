@@ -302,8 +302,9 @@ python scripts/build_dashboard.py
 **Solution:** Check the node logs for detailed error messages:
 
 ```bash
-# View node logs
-poetry run python -m datamgmtnode.main --log-level DEBUG
+# View node logs (log level is currently fixed at INFO in main.py:11;
+# edit datamgmtnode/main.py to change it)
+poetry run python datamgmtnode/main.py
 ```
 
 ## See Also

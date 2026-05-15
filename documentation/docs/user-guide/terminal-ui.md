@@ -13,16 +13,20 @@ The TUI provides:
 
 ## Starting the TUI
 
-```bash
-# Start the TUI (node must be running)
-poetry run python -m datamgmtnode.tui
+The TUI is launched via `main.py --tui` (see `datamgmtnode/main.py:74,131`):
 
-# Or with custom API URL
-poetry run python -m datamgmtnode.tui --api-url http://localhost:8082
+```bash
+# Start the TUI (node must already be running in another shell)
+poetry run python datamgmtnode/main.py --tui
+
+# Or with a custom Dashboard API URL
+poetry run python datamgmtnode/main.py --tui --api-url http://localhost:8082
 ```
 
 !!! note
-    The node must be running before starting the TUI. The TUI connects to the Dashboard API on port 8082.
+    The node must be running before starting the TUI. The TUI connects to the
+    Dashboard API on port 8082 by default (`--api-url`'s default is
+    `http://localhost:8082`).
 
 ## Keyboard Shortcuts
 
@@ -146,20 +150,22 @@ datamgmtnode/tui/
 
 ### API Client
 
-The TUI uses a dedicated API client that connects to the Dashboard API:
+The TUI uses `DashboardClient` (see `datamgmtnode/tui/api_client.py:13`):
 
 ```python
 from datamgmtnode.tui.api_client import DashboardClient
 
 client = DashboardClient("http://localhost:8082")
 
-# Connect to WebSocket
+# Connect to WebSocket (auto-reconnects on disconnect)
 await client.connect_websocket()
 
-# Make API requests
+# Convenience helpers (see api_client.py:175+ for the full list)
 health = await client.get_health()
 tokens = await client.get_tokens()
-peers = await client.get_peers()
+peers = await client.get_peers(healthy_only=False)
+stats = await client.get_network_stats()
+info = await client.get_dashboard_info()
 
 # Disconnect
 await client.disconnect()
@@ -245,17 +251,9 @@ BINDINGS = [
 
 ## Requirements
 
-The TUI requires the Textual library:
-
-```bash
-pip install textual
-```
-
-Or with Poetry:
-
-```bash
-poetry add textual
-```
+The TUI requires the Textual library, already declared in `pyproject.toml`
+(`textual = "^0.47.0"`); `poetry install` pulls it in. If you opt out of the
+TUI you can remove that dependency.
 
 ## Troubleshooting
 
@@ -277,7 +275,7 @@ poetry add textual
 
 2. Check the API URL:
    ```bash
-   poetry run python -m datamgmtnode.tui --api-url http://localhost:8082
+   poetry run python datamgmtnode/main.py --tui --api-url http://localhost:8082
    ```
 
 ### Display Issues

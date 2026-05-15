@@ -11,26 +11,31 @@ cd datamgmtnode
 poetry run python datamgmtnode/main.py
 ```
 
-You should see:
+You should see (log format from `datamgmtnode/main.py:11`):
 
 ```
-2024-01-15 10:30:00 - __main__ - INFO - Configuration validated successfully
-2024-01-15 10:30:01 - __main__ - INFO - Node started successfully
-2024-01-15 10:30:01 - __main__ - INFO -   - Internal API: http://localhost:8080
-2024-01-15 10:30:01 - __main__ - INFO -   - External API: http://0.0.0.0:8081
-2024-01-15 10:30:01 - __main__ - INFO -   - Dashboard API: http://localhost:8082
-2024-01-15 10:30:01 - __main__ - INFO -   - P2P Port: 8000
-2024-01-15 10:30:01 - __main__ - INFO - Press Ctrl+C to stop the node
+2026-01-15 10:30:00 - __main__ - INFO - Configuration validated successfully
+2026-01-15 10:30:01 - __main__ - INFO - Node started successfully
+2026-01-15 10:30:01 - __main__ - INFO -   - Internal API: http://localhost:8080
+2026-01-15 10:30:01 - __main__ - INFO -   - External API: http://0.0.0.0:8081
+2026-01-15 10:30:01 - __main__ - INFO -   - Dashboard:    http://localhost:8082
+2026-01-15 10:30:01 - __main__ - INFO -   - P2P Port:     8000
+2026-01-15 10:30:01 - __main__ - INFO - Press Ctrl+C to stop the node
 ```
 
 ### Command-Line Options
+
+The CLI flags are defined in `datamgmtnode/main.py:69`:
 
 ```bash
 # Start without the web dashboard
 poetry run python datamgmtnode/main.py --no-dashboard
 
-# Launch the Terminal UI instead
+# Launch the Terminal UI instead (connects to a running node)
 poetry run python datamgmtnode/main.py --tui
+
+# Point the TUI at a non-default Dashboard API
+poetry run python datamgmtnode/main.py --tui --api-url http://other-host:8082
 ```
 
 ## Check Node Health
@@ -153,7 +158,7 @@ curl -X POST http://localhost:8081/share_data \
 
 ## View Network Statistics
 
-Check your P2P network status:
+Check your P2P network status (response shape from `P2PNetwork.get_network_stats`, `datamgmtnode/network/p2p_network.py:518`):
 
 ```bash
 curl http://localhost:8081/network/stats
@@ -165,9 +170,9 @@ Response:
 {
   "total_peers": 5,
   "healthy_peers": 4,
-  "data_sent": 1024000,
-  "data_received": 512000,
-  "uptime": 3600
+  "active_peers": 4,
+  "bootstrap_nodes": 2,
+  "avg_latency_ms": 87.4
 }
 ```
 
@@ -176,10 +181,13 @@ Response:
 Press `Ctrl+C` to gracefully stop the node:
 
 ```
-2024-01-15 11:30:00 - __main__ - INFO - Received signal SIGINT
-2024-01-15 11:30:00 - __main__ - INFO - Shutting down node...
-2024-01-15 11:30:01 - __main__ - INFO - Node stopped gracefully.
+2026-01-15 11:30:00 - __main__ - INFO - Received signal SIGINT
+2026-01-15 11:30:00 - __main__ - INFO - Shutting down node...
+2026-01-15 11:30:01 - __main__ - INFO - Node stopped gracefully.
 ```
+
+The graceful-shutdown timeout is `SHUTDOWN_TIMEOUT = 30` seconds
+(see `datamgmtnode/main.py:17`).
 
 ## Access the Dashboard
 
@@ -194,13 +202,15 @@ Once your node is running, you can monitor it through:
 
 === "Terminal UI"
 
-    Start the TUI in a separate terminal:
+    Start the TUI in a separate terminal (the TUI requires the Dashboard API to already be running):
 
     ```bash
-    poetry run python -m datamgmtnode.tui
+    poetry run python datamgmtnode/main.py --tui
     ```
 
-    Use keyboard shortcuts to navigate: `m` (main), `h` (health), `t` (tokens), `n` (network), `q` (quit).
+    Keyboard bindings (defined in `datamgmtnode/tui/app.py:32`):
+    `m` main, `h` health, `t` tokens, `x` transfers, `d` data,
+    `c` compliance, `n` network, `r` refresh, `q` quit.
 
 ## Next Steps
 
