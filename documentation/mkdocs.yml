@@ -25,6 +25,7 @@ theme:
   features:
     - navigation.tabs
     - navigation.sections
+    - navigation.indexes
     - navigation.expand
     - navigation.top
     - search.suggest
@@ -51,28 +52,30 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Getting Started:
-    - Installation: getting-started/installation.md
-    - Quick Start: getting-started/quickstart.md
-    - Configuration: getting-started/configuration.md
-  - User Guide:
-    - Overview: user-guide/overview.md
-    - Web Dashboard: user-guide/web-dashboard.md
-    - Terminal UI: user-guide/terminal-ui.md
-    - Data Sharing: user-guide/data-sharing.md
-    - API Reference: user-guide/api-reference.md
-    - P2P Network: user-guide/p2p-network.md
+  - Docs:
+    - Getting Started:
+      - Installation: getting-started/installation.md
+      - Quick Start: getting-started/quickstart.md
+      - Configuration: getting-started/configuration.md
+    - User Guide:
+      - Overview: user-guide/overview.md
+      - Web Dashboard: user-guide/web-dashboard.md
+      - Terminal UI: user-guide/terminal-ui.md
+      - Data Sharing: user-guide/data-sharing.md
+      - API Reference: user-guide/api-reference.md
+      - P2P Network: user-guide/p2p-network.md
   - Operations:
     - Deployment: operations/deployment.md
     - Monitoring: operations/monitoring.md
     - Performance: operations/performance.md
     - Security: operations/security.md
     - Troubleshooting: operations/troubleshooting.md
-  - Development:
-    - Architecture: development/architecture.md
-    - Plugin Development: development/plugins.md
-    - Smart Contracts: development/smart-contracts.md
-    - Testing: development/testing.md
+  - Project:
+    - Development:
+      - Architecture: development/architecture.md
+      - Plugin Development: development/plugins.md
+      - Smart Contracts: development/smart-contracts.md
+      - Testing: development/testing.md
   # Removed "Contributing" — no CONTRIBUTING.md / contributor guide exists in repo;
   # standard PR flow only. Tooling claims (flake8/mypy/pre-commit) were not configured.
 
