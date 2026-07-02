@@ -1,5 +1,7 @@
 # DataMgmt Node
 
+**[🌐 Site](https://datamgmtnode.cryptuon.com/) · [📚 Docs](https://docs.cryptuon.com/datamgmtnode/) · [🔬 Cryptuon Research](https://github.com/cryptuon)**
+
 This project implements a decentralized system for enterprise data management and sharing, leveraging blockchain technology, peer-to-peer networking, and flexible data storage solutions.
 
 ## Features
@@ -107,3 +109,13 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## Part of Cryptuon Research
+
+`datamgmtnode` is one of [20 open-source blockchain-infrastructure projects](https://www.cryptuon.com/projects) from **[Cryptuon Research](https://www.cryptuon.com)** — blockchain theory, shipped as protocols.
+
+**Related projects:** [SolanaVault](https://solanavault.cryptuon.com/) · [Switchboard](https://switchboard.cryptuon.com/) · [blockchain-compression](https://blockchain-compression.cryptuon.com/)
+
+Docs: [docs.cryptuon.com/datamgmtnode](https://docs.cryptuon.com/datamgmtnode/) · Contact: [contact@cryptuon.com](mailto:contact@cryptuon.com)

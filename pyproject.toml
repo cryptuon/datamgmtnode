@@ -1,9 +1,21 @@
 [tool.poetry]
 name = "datamgmtnode"
 version = "0.1.0"
-description = "Decentralized enterprise data management and sharing system"
-authors = ["Dipankar Sarkar <me@dipankar.name>"]
+description = "Decentralized enterprise data sharing over EVM chains and the Gun P2P network."
+authors = ["Cryptuon Research <contact@cryptuon.com>"]
 readme = "README.md"
+homepage = "https://datamgmtnode.cryptuon.com/"
+documentation = "https://docs.cryptuon.com/datamgmtnode/"
+repository = "https://github.com/cryptuon/datamgmtnode"
+keywords = ["enterprise", "data-management", "evm", "p2p", "blockchain", "gun"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Distributed Computing",
+]
 
 [tool.poetry.dependencies]
 python = "^3.11"

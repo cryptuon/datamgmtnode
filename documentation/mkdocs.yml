@@ -1,7 +1,8 @@
 site_name: DataMgmt Node
-site_description: Decentralized Enterprise Data Management Platform
-site_author: DataMgmt Team
+site_description: Decentralized enterprise data sharing over EVM chains and the Gun P2P network.
+site_author: Cryptuon Research
 site_url: https://docs.cryptuon.com/datamgmtnode/
+copyright: "© 2026 Cryptuon Research"
 
 repo_name: cryptuon/datamgmtnode
 repo_url: https://github.com/cryptuon/datamgmtnode
@@ -80,6 +81,9 @@ nav:
   # standard PR flow only. Tooling claims (flake8/mypy/pre-commit) were not configured.
 
 extra:
+  homepage: https://datamgmtnode.cryptuon.com/
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/cryptuon/datamgmtnode
+      link: https://github.com/cryptuon
+    - icon: material/web
+      link: https://datamgmtnode.cryptuon.com/
