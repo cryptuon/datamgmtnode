@@ -1,4 +1,81 @@
-# DataMgmt Node - Development Roadmap
+# DataMgmt Node — Roadmap
+
+## Vision
+
+DataMgmt Node aims to be the **provenance layer for regulated and asset-backing data**: a decentralized way for organizations to share sensitive data under encryption while every access and compliance event leaves an **immutable, independently verifiable audit trail** anchored on an EVM chain.
+
+The 2026 opportunity is concrete. **RWA tokenization** is pushing enormous volumes of off-chain data (valuations, attestations, legal documents, invoices) toward on-chain assets that are only as trustworthy as that data's lineage. **Regulated data sharing** in healthcare, finance, and supply chains needs audit trails that survive audits and disputes. Both problems reduce to the same primitive: *prove data integrity and history without trusting a single centralized platform*. That is what DataMgmt Node is built to demonstrate.
+
+We are honest about stage: the platform is **Alpha**. This roadmap is the path from working reference architecture to something you could responsibly run against real regulated data.
+
+## Milestones
+
+### M1 — Verifiable core (largely in place)
+- Kademlia DHT P2P data layer with peer discovery, health monitoring, and re-bootstrap ✅
+- Fernet end-to-end encryption with PBKDF2-protected, versioned keys ✅
+- On-chain compliance event recording (SHA-256 hash anchored on EVM) ✅
+- Token + payment layer for metering data transactions ✅
+- Test suite (74 tests) ✅
+
+### M2 — Provenance you can trust
+- Structured, queryable compliance/audit index (move beyond linear block scanning in `compliance_manager`)
+- Signed data manifests: bind each shared payload to node identity + timestamp + content hash
+- Merkle batching of compliance events to cut on-chain cost and enable efficient inclusion proofs
+- Access-grant records (who was granted/revoked access to what, on-chain)
+
+### M3 — Enterprise & compliance readiness
+- Pluggable access control (RBAC/ABAC) and retention policies
+- Optional KYC/allowlist gating for regulated data pools
+- Key management via external KMS/HSM instead of local master password
+- Structured logging + Prometheus metrics + health/SLA dashboards
+
+### M4 — RWA integrations
+- Reference adapters that link a shared data manifest to an RWA token's metadata
+- Attestation flow: third-party signer vouches for underlying data, recorded on-chain
+- Data-availability guarantees (replication factor SLAs) for token-backing documents
+
+---
+
+## Cheapest path to production
+
+You do **not** need Ethereum L1 to run DataMgmt Node in production, and you shouldn't start there. The workload here is *many small compliance-event transactions* (one hashed event per share/access). On L1 mainnet, each of those is dollars of gas; the pattern is economically absurd at any real volume. **Anchor on the cheapest viable EVM L2 instead.**
+
+### 1. Anchor on a low-cost EVM L2
+
+Because the code is already EVM-generic (just point `BLOCKCHAIN_URL` at a different RPC), migrating is a config change, not a rewrite.
+
+| Chain | Typical cost per compliance-event tx | Why it fits | Tradeoff |
+|-------|--------------------------------------|-------------|----------|
+| **Base** | fractions of a cent | Low fees, strong tooling, backed by a major exchange; good default for enterprise pilots | Sequencer is currently centralized |
+| **Polygon PoS** | ~a cent or less | Mature, huge ecosystem, easy RPC availability | Its own validator-set trust assumptions |
+| **Arbitrum One** | fractions of a cent | Largest L2 by activity, robust fraud-proof security model | Marginally higher fees than Base at times |
+| Ethereum L1 | dollars | Maximum decentralization/finality | Far too expensive for per-event anchoring |
+
+**Recommendation:** start on **Base** for a pilot (cheapest + simplest operationally), keep **Polygon** and **Arbitrum** as drop-in alternatives, and reserve **Ethereum L1** only for periodic Merkle-root checkpointing if a customer demands L1-grade finality. Batch events into Merkle roots (M2) so you write one root instead of one tx per event — this cuts anchoring cost by another order of magnitude.
+
+### 2. Production-viability checklist
+
+Anchoring cheaply is necessary but not sufficient. Before real regulated or asset-backing data:
+
+- **Security audit** — independent review of the encryption path, key handling, blockchain interface, and API authorization. No production regulated data before this.
+- **Key management / HSM** — move `PRIVATE_KEY` and `KEY_MASTER_PASSWORD` out of `.env` into a managed KMS/HSM (AWS KMS, GCP KMS, HashiCorp Vault, or a hardware HSM). Enforce key rotation.
+- **Compliance controls** — access control (RBAC/ABAC), data retention + deletion policies, and KYC/allowlist gating where the jurisdiction or asset class requires it. Map controls to the relevant regime (HIPAA, GDPR, SOC 2, MiCA/RWA rules).
+- **DHT reliability / replication** — configure and monitor replication factor so no shared payload lives on a single node; alert on under-replication; validate re-bootstrap under partition.
+- **Monitoring & observability** — structured logging, Prometheus metrics, uptime/latency SLAs on the P2P and API layers, and alerting on anchoring failures (a dropped compliance write is a compliance gap).
+
+### 3. Rough cost posture for a pilot
+
+- One low-cost L2 RPC endpoint (managed tier): tens of dollars/month.
+- 3–5 small P2P nodes (commodity VMs) for replication: low hundreds of dollars/month.
+- Per-event anchoring on an L2 with Merkle batching: cents/day at pilot volume.
+
+The dominant cost is engineering the compliance and audit posture — not chain fees. Choosing an L2 up front keeps chain fees a rounding error so the budget goes where the risk actually is.
+
+---
+
+# Development History
+
+_The section below is the historical build/fix log for the reference implementation. It is retained for accuracy and is not part of the forward roadmap above._
 
 ## Status: All Phases Complete
 

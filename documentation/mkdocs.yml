@@ -1,5 +1,5 @@
 site_name: DataMgmt Node
-site_description: Decentralized enterprise data sharing over EVM chains and the Gun P2P network.
+site_description: Decentralized enterprise data sharing with verifiable provenance over EVM chains and a Kademlia DHT P2P network.
 site_author: Cryptuon Research
 site_url: https://docs.cryptuon.com/datamgmtnode/
 copyright: "© 2026 Cryptuon Research"
