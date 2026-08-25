@@ -63,34 +63,36 @@ openssl rand -base64 32
 
 ### Key Rotation
 
-Rotate encryption keys periodically:
+Rotate encryption keys via `KeyManager.rotate_key`
+(see `datamgmtnode/services/key_manager.py:128`):
 
 ```python
-from services.key_manager import KeyManager
+from datamgmtnode.services.key_manager import KeyManager
 
-# Initialize key manager
-key_manager = KeyManager("/data", master_password="your-password")
+key_manager = KeyManager("/path/to/data_dir", master_password="your-password")
 key_manager.initialize()
 
-# Rotate to new key
 new_version = key_manager.rotate_key()
 print(f"Rotated to key version {new_version}")
 ```
 
 !!! info "Backward Compatibility"
-    Old data can still be decrypted after rotation using the previous key version.
+    Old versions remain in memory and on disk so previously-encrypted data is
+    still decryptable via `key_manager.get_cipher(version)`.
 
 ### Encryption at Rest
 
-Keys are encrypted at rest using PBKDF2:
+Keys are encrypted at rest using PBKDF2-HMAC-SHA256 (480,000 iterations,
+random 16-byte salt) and stored at `${data_dir}/encryption_keys.json` with
+mode `0600` (see `_save_keys` at `key_manager.py:66`):
 
 ```json
 {
   "salt": "base64-encoded-salt",
   "current_version": 2,
   "keys": {
-    "1": "encrypted-key-v1",
-    "2": "encrypted-key-v2"
+    "1": "base64-encoded-fernet-encrypted-key-v1",
+    "2": "base64-encoded-fernet-encrypted-key-v2"
   }
 }
 ```
@@ -99,18 +101,21 @@ Keys are encrypted at rest using PBKDF2:
 
 ### API Keys
 
-Protected endpoints require API key authentication:
+External API endpoints check for an `X-API-Key` header
+(`datamgmtnode/api/external_api.py:203`):
 
 ```bash
 curl -H "X-API-Key: your-api-key" http://localhost:8081/share_data
 ```
 
-Best practices:
+!!! danger "Default is permissive"
+    Today, requests with no `X-API-Key` header are **accepted** in the
+    "development mode" branch of `_verify_api_access`. Before exposing the
+    External API publicly, change that branch to deny by default.
 
-- Generate unique keys per client
-- Set expiration dates
-- Monitor usage patterns
-- Revoke compromised keys immediately
+If a key is supplied, it must match either `node.config.node_id` or a
+`node.config.api_key` attribute (the latter is not set anywhere in the
+current source — you would have to add it).
 
 ### Node Authentication
 
@@ -342,12 +347,9 @@ Stay informed about security updates:
 
 ## Reporting Vulnerabilities
 
-Report security issues responsibly:
-
-1. Do not disclose publicly
-2. Email security@example.com
-3. Include detailed reproduction steps
-4. Allow time for fix before disclosure
+Report security issues responsibly via a private security advisory on the
+GitHub repository: <https://github.com/cryptuon/datamgmtnode/security/advisories>.
+Include reproduction steps and allow time for a fix before public disclosure.
 
 ## Next Steps
 

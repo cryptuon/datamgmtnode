@@ -290,34 +290,46 @@ class ValidationError(Exception):
 
 ## Plugin System
 
-### Plugin Interface
+### Plugin Interface (convention, not a base class)
+
+There is no `BasePlugin` class in the source. A plugin is simply a Python
+module in the configured plugin directory exposing a class that:
+
+- Accepts the `Node` instance in its `__init__`
+- Implements `initialize()` and `shutdown()`
 
 ```python
-class BasePlugin:
+class MyPlugin:
     def __init__(self, node):
         self.node = node
 
     def initialize(self):
-        """Called when plugin is loaded."""
-        pass
+        """Called once after construction."""
 
     def shutdown(self):
-        """Called when node shuts down."""
-        pass
+        """Called when the node stops."""
 ```
 
 ### Plugin Loading
 
+From `PluginManager.load_plugins`
+(`datamgmtnode/services/plugin_manager.py:13`):
+
 ```python
-class PluginManager:
-    def load_plugins(self):
-        for filename in os.listdir(self.plugin_dir):
-            if filename.endswith('.py'):
-                module = __import__(f'plugins.{module_name}')
-                plugin_class = getattr(module, f'{name}Plugin')
-                plugin = plugin_class(self.node)
-                plugin.initialize()
+def load_plugins(self):
+    for filename in os.listdir(self.plugin_dir):
+        if filename.endswith('.py') and not filename.startswith('__'):
+            module_name = filename[:-3]
+            module = __import__(f'plugins.{module_name}', fromlist=[''])
+            plugin_class = getattr(module, f'{module_name.capitalize()}Plugin')
+            plugin = plugin_class(self.node)
+            self.plugins[module_name] = plugin
+            plugin.initialize()
 ```
+
+The class name is derived as `module_name.capitalize() + "Plugin"`. So
+`audit_plugin.py` must define `Audit_pluginPlugin` (yes, with the
+underscore — Python's `str.capitalize()` only uppercases the first letter).
 
 ## Testing
 
@@ -353,5 +365,5 @@ class TestDataManager:
 
 ## Next Steps
 
-- [Contributing Guide](contributing.md) - How to contribute
 - [Testing Guide](testing.md) - Running tests
+- [Plugin Development](plugins.md) - Extending the node

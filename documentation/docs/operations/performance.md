@@ -32,7 +32,7 @@ The node supports two storage backends:
 
 RocksDB is used automatically if available; otherwise falls back to LevelDB.
 
-### Installing RocksDB
+### Installing RocksDB (optional)
 
 ```bash
 # Ubuntu/Debian
@@ -41,9 +41,13 @@ sudo apt install librocksdb-dev
 # macOS
 brew install rocksdb
 
-# Python bindings
+# Python bindings (not in pyproject.toml; install separately if you want it)
 pip install python-rocksdb
 ```
+
+If the `rocksdb` import fails at startup, `DataManager._init_database`
+silently falls back to LevelDB / Plyvel
+(see `datamgmtnode/services/data_manager.py:12`).
 
 ### Database Path Configuration
 
@@ -104,21 +108,20 @@ Peers are considered healthy when:
 
 ### Adjusting Limits
 
-Modify in `api/rate_limiter.py`:
+Modify the factory functions in `datamgmtnode/api/rate_limiter.py:130`:
 
 ```python
-# Higher limits for internal use
-internal_limiter = RateLimiter(
-    rate=100,   # requests per second
-    burst=200   # burst allowance
-)
+def create_internal_rate_limiter() -> RateLimiter:
+    return RateLimiter(requests_per_second=100.0, burst_size=200)
 
-# Stricter limits for public API
-external_limiter = RateLimiter(
-    rate=20,
-    burst=40
-)
+def create_external_rate_limiter() -> RateLimiter:
+    return RateLimiter(requests_per_second=20.0, burst_size=40)
 ```
+
+The `RateLimiter` constructor signature is
+`RateLimiter(requests_per_second: float, burst_size: int)`
+(see `rate_limiter.py:18`). Health-check paths (`/health`, `/healthz`,
+`/ready`) are exempted by the middleware.
 
 ### Per-Client Tracking
 
